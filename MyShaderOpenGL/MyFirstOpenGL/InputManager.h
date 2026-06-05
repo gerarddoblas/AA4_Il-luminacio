@@ -22,6 +22,8 @@ public:
 
 	double GetMouseX() const;
 	double GetMouseY() const;
+	double GetMouseDeltaX() const;
+	double GetMouseDeltaY() const;
 	bool GetKey(GLuint input, KeyState inputValue);
 
 private:
@@ -38,6 +40,9 @@ private:
 	//Son double porque glfwGetCursorPos() me obliga a pasar doubles, no hago cast por perdida de datos
 	double mouseX = 0;
 	double mouseY = 0;
+	double prevMouseX = 0;
+	double prevMouseY = 0;
+	bool firstMouseRead = true; //evita un movimiento brusco la primera vez que se lee el movimiento.
 
 	std::unordered_map<GLuint, KeyState> keyReference;
 };
