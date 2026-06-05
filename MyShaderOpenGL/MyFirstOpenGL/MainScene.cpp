@@ -1,152 +1,200 @@
 #include "MainScene.h"
+#include "InputManager.h"
 
 void MainScene::OnEnter()
 {
-    //Camera
+    // Camara
     camera = new Camera();
 
-    //Trolls
+    // Sun
+    sun = new DirectionalLight();
+    sun->SetTag("sun");
+    sun->color     = glm::vec3(1.0f, 0.95f, 0.8f);
+    sun->intensity = 1.0f;
+    AddGameObject(sun);
+
+    // Visual Sun
+    sunVisual = new ModelObject("../Assets/Modelos/Sun.obj", "../Assets/Texturas/Sun.png");
+    sunVisual->SetUnlit(true); // Para que brille sin ser afectado por la luz
+    // model del sol es enorme lo bajo la escala para poder verlo
+    sunVisual->GetTransform()->scale = glm::vec3(0.00025f);
+    AddGameObject(sunVisual);
+
+    // Moon
+    moon = new DirectionalLight();
+    moon->SetTag("moon");
+    moon->color     = glm::vec3(0.4f, 0.5f, 0.8f);
+    moon->intensity = 0.4f;
+    AddGameObject(moon);
+
+    // MoonVisual
+    moonVisual = new ModelObject("../Assets/Modelos/Moon.obj", "../Assets/Texturas/Moon.png");
+    moonVisual->SetUnlit(true);
+    moonVisual->GetTransform()->scale = glm::vec3(3.0f);
+    AddGameObject(moonVisual);
+
+    // DayNightCycle
+    dayNightCycle = new DayNightCycle(sun, moon);
+    dayNightCycle->cycleDuration = 20.0f;
+    dayNightCycle->orbitRadius   = 70.0f; // Distancia a la escene
+    
+    dayNightCycle->onAmbientChanged = [this](glm::vec3 color, float intensity)
+    {
+        ambientColor     = color;
+        ambientIntensity = intensity;
+    };
+    AddGameObject(dayNightCycle);
+
+    // Troll
     ModelObject* troll1 = new ModelObject("../Assets/Modelos/troll.obj", "../Assets/Texturas/troll.png");
     troll1->GetTransform()->position = glm::vec3(0.0f, -0.8f, -1.0f);
-    troll1->GetTransform()->scale = glm::vec3(0.3f);
+    troll1->GetTransform()->scale    = glm::vec3(0.3f);
     troll1->GetTransform()->rotation = glm::vec3(90.0f, 0.0f, 0.0f);
     troll1->SetTag("troll1");
     AddGameObject(troll1);
 
     ModelObject* troll2 = new ModelObject("../Assets/Modelos/troll.obj", "../Assets/Texturas/troll.png");
     troll2->GetTransform()->position = glm::vec3(-1.0f, -0.8f, -0.5f);
-    troll2->GetTransform()->scale = glm::vec3(0.3f);
+    troll2->GetTransform()->scale    = glm::vec3(0.3f);
     troll2->GetTransform()->rotation = glm::vec3(0.0f, 90.0f, 0.0f);
-    troll2->SetTintColor(glm::vec4(3.0f, 0.0f, 0.0f, 1.0f)); // Rojo
     troll2->SetTag("troll2");
     AddGameObject(troll2);
 
     ModelObject* troll3 = new ModelObject("../Assets/Modelos/troll.obj", "../Assets/Texturas/troll.png");
     troll3->GetTransform()->position = glm::vec3(1.0f, -0.8f, -2.0f);
-    troll3->GetTransform()->scale = glm::vec3(0.3f);;
-    troll3->SetTintColor(glm::vec4(3.0f, 2.5f, 0.0f, 1.0f)); // Amarillo
+    troll3->GetTransform()->scale    = glm::vec3(0.3f);
     troll3->SetTag("troll3");
     AddGameObject(troll3);
 
     ModelObject* troll4 = new ModelObject("../Assets/Modelos/troll.obj", "../Assets/Texturas/troll.png");
     troll4->GetTransform()->position = glm::vec3(-0.5f, -0.8f, -2.5f);
-    troll4->GetTransform()->scale = glm::vec3(0.3f);
-    troll4->GetTransform()->rotation = glm::vec3(0.0f,0.0f, 0.0f);
-    troll4->SetTintColor(glm::vec4(1.5f, 0.8f, 0.2f, 1.0f)); // Marrón
+    troll4->GetTransform()->scale    = glm::vec3(0.3f);
     troll4->SetTag("troll4");
     AddGameObject(troll4);
 
-    //Rocks alrededor de los trolls
+    // Rock
     ModelObject* rock = new ModelObject("../Assets/Modelos/rock.obj", "../Assets/Texturas/rock.png");
     rock->GetTransform()->position = glm::vec3(0.5f, -0.8f, 0.5f);
-    rock->GetTransform()->scale = glm::vec3(0.3f);
+    rock->GetTransform()->scale    = glm::vec3(0.3f);
     rock->GetTransform()->rotation = glm::vec3(90.0f, 0.0f, 0.0f);
     AddGameObject(rock);
 
     ModelObject* rock2 = new ModelObject("../Assets/Modelos/rock.obj", "../Assets/Texturas/rock.png");
     rock2->GetTransform()->position = glm::vec3(-1.8f, -0.8f, 0.0f);
-    rock2->GetTransform()->scale = glm::vec3(0.3f);
+    rock2->GetTransform()->scale    = glm::vec3(0.3f);
     rock2->GetTransform()->rotation = glm::vec3(90.0f, 20.0f, 0.0f);
     AddGameObject(rock2);
 
     ModelObject* rock3 = new ModelObject("../Assets/Modelos/rock.obj", "../Assets/Texturas/rock.png");
     rock3->GetTransform()->position = glm::vec3(1.8f, -0.8f, 0.0f);
-    rock3->GetTransform()->scale = glm::vec3(0.3f);
+    rock3->GetTransform()->scale    = glm::vec3(0.3f);
     rock3->GetTransform()->rotation = glm::vec3(90.0f, 75.0f, 0.0f);
     AddGameObject(rock3);
 
     ModelObject* rock4 = new ModelObject("../Assets/Modelos/rock.obj", "../Assets/Texturas/rock.png");
     rock4->GetTransform()->position = glm::vec3(-1.8f, -0.8f, -2.0f);
-    rock4->GetTransform()->scale = glm::vec3(0.3f);
+    rock4->GetTransform()->scale    = glm::vec3(0.3f);
     rock4->GetTransform()->rotation = glm::vec3(90.0f, 110.0f, 0.0f);
     AddGameObject(rock4);
 
     ModelObject* rock5 = new ModelObject("../Assets/Modelos/rock.obj", "../Assets/Texturas/rock.png");
     rock5->GetTransform()->position = glm::vec3(1.8f, -0.8f, -2.0f);
-    rock5->GetTransform()->scale = glm::vec3(0.3f);
+    rock5->GetTransform()->scale    = glm::vec3(0.3f);
     rock5->GetTransform()->rotation = glm::vec3(90.0f, 160.0f, 0.0f);
     AddGameObject(rock5);
 
     ModelObject* rock6 = new ModelObject("../Assets/Modelos/rock.obj", "../Assets/Texturas/rock.png");
     rock6->GetTransform()->position = glm::vec3(-1.8f, -0.8f, -4.0f);
-    rock6->GetTransform()->scale = glm::vec3(0.3f);
+    rock6->GetTransform()->scale    = glm::vec3(0.3f);
     rock6->GetTransform()->rotation = glm::vec3(90.0f, 200.0f, 0.0f);
     AddGameObject(rock6);
 
     ModelObject* rock7 = new ModelObject("../Assets/Modelos/rock.obj", "../Assets/Texturas/rock.png");
     rock7->GetTransform()->position = glm::vec3(1.8f, -0.8f, -4.0f);
-    rock7->GetTransform()->scale = glm::vec3(0.3f);
+    rock7->GetTransform()->scale    = glm::vec3(0.3f);
     rock7->GetTransform()->rotation = glm::vec3(90.0f, 240.0f, 0.0f);
     AddGameObject(rock7);
 
     ModelObject* rock8 = new ModelObject("../Assets/Modelos/rock.obj", "../Assets/Texturas/rock.png");
     rock8->GetTransform()->position = glm::vec3(0.0f, -0.8f, -5.0f);
-    rock8->GetTransform()->scale = glm::vec3(0.3f);
+    rock8->GetTransform()->scale    = glm::vec3(0.3f);
     rock8->GetTransform()->rotation = glm::vec3(90.0f, 300.0f, 0.0f);
     AddGameObject(rock8);
 
-    // Rocas entre los trolls
     ModelObject* rock9 = new ModelObject("../Assets/Modelos/rock.obj", "../Assets/Texturas/rock.png");
     rock9->GetTransform()->position = glm::vec3(-0.5f, -0.8f, -1.5f);
-    rock9->GetTransform()->scale = glm::vec3(0.2f);
+    rock9->GetTransform()->scale    = glm::vec3(0.2f);
     rock9->GetTransform()->rotation = glm::vec3(90.0f, 45.0f, 0.0f);
     AddGameObject(rock9);
 
     ModelObject* rock10 = new ModelObject("../Assets/Modelos/rock.obj", "../Assets/Texturas/rock.png");
     rock10->GetTransform()->position = glm::vec3(0.5f, -0.8f, -3.0f);
-    rock10->GetTransform()->scale = glm::vec3(0.2f);
+    rock10->GetTransform()->scale    = glm::vec3(0.2f);
     rock10->GetTransform()->rotation = glm::vec3(90.0f, 130.0f, 0.0f);
     AddGameObject(rock10);
 
     ModelObject* rock11 = new ModelObject("../Assets/Modelos/rock.obj", "../Assets/Texturas/rock.png");
     rock11->GetTransform()->position = glm::vec3(-0.3f, -0.8f, -3.5f);
-    rock11->GetTransform()->scale = glm::vec3(0.15f);
+    rock11->GetTransform()->scale    = glm::vec3(0.15f);
     rock11->GetTransform()->rotation = glm::vec3(90.0f, 80.0f, 0.0f);
     AddGameObject(rock11);
 
-
-    //Nubes
+    // Clouds
     ModelObject* nube = new ModelObject("../Assets/Modelos/rock.obj", "../Assets/Texturas/rock.png");
     nube->GetTransform()->position = glm::vec3(-3.0f, 1.5f, -2.0f);
-    nube->GetTransform()->scale = glm::vec3(0.3f);
+    nube->GetTransform()->scale    = glm::vec3(0.3f);
     nube->GetTransform()->rotation = glm::vec3(90.0f, 0.0f, 0.0f);
     nube->SetTintColor(glm::vec4(3.0f, 3.0f, 3.0f, 1.0f));
     AddGameObject(nube);
 
     ModelObject* nube2 = new ModelObject("../Assets/Modelos/rock.obj", "../Assets/Texturas/rock.png");
     nube2->GetTransform()->position = glm::vec3(3.5f, 1.5f, -3.0f);
-    nube2->GetTransform()->scale = glm::vec3(0.2f);
+    nube2->GetTransform()->scale    = glm::vec3(0.2f);
     nube2->GetTransform()->rotation = glm::vec3(90.0f, 45.0f, 0.0f);
     nube2->SetTintColor(glm::vec4(3.0f, 3.0f, 3.0f, 1.0f));
     AddGameObject(nube2);
-    
+
     ModelObject* nube3 = new ModelObject("../Assets/Modelos/rock.obj", "../Assets/Texturas/rock.png");
     nube3->GetTransform()->position = glm::vec3(4.0f, 1.3f, -1.5f);
-    nube3->GetTransform()->scale = glm::vec3(0.28f);
+    nube3->GetTransform()->scale    = glm::vec3(0.28f);
     nube3->GetTransform()->rotation = glm::vec3(90.0f, 30.0f, 15.0f);
     nube3->SetTintColor(glm::vec4(3.0f, 3.0f, 3.0f, 1.0f));
     AddGameObject(nube3);
-    
+
     ModelObject* nube4 = new ModelObject("../Assets/Modelos/rock.obj", "../Assets/Texturas/rock.png");
     nube4->GetTransform()->position = glm::vec3(-3.5f, 1.4f, -1.0f);
-    nube4->GetTransform()->scale = glm::vec3(0.20f);
+    nube4->GetTransform()->scale    = glm::vec3(0.20f);
     nube4->GetTransform()->rotation = glm::vec3(90.0f, 55.0f, 30.0f);
     nube4->SetTintColor(glm::vec4(3.0f, 3.0f, 3.0f, 1.0f));
     AddGameObject(nube4);
 
-
-    //Suelo
+    // Ground
     Cube* suelo = new Cube(
         glm::vec3(0.0f, -1.5f, -3.0f),
         glm::vec3(20.0f, 0.1f, 20.0f)
     );
     AddGameObject(suelo);
 
-    //Cielo azul
+    // Sky
     glClearColor(0.4f, 0.6f, 0.9f, 1.0f);
 }
 
 void MainScene::Update(float dt)
 {
     Scene::Update(dt);
+
+    // Luz y sol o luna en la misma pos
+    if (sun && sunVisual)
+    {
+        sunVisual->GetTransform()->position = sun->GetTransform()->position;
+    }
+
+    if (moon && moonVisual)
+    {
+        moonVisual->GetTransform()->position = moon->GetTransform()->position;
+        moonVisual->GetTransform()->rotation = moon->GetTransform()->rotation;
+    }
+
+    // color del sky sigue cycle nightday
+    glClearColor(ambientColor.r * 0.5f, ambientColor.g * 0.7f, ambientColor.b, 1.0f);
 }
