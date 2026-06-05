@@ -1,4 +1,4 @@
-#include "Cube.h"
+﻿#include "Cube.h"
 #include <gtc/matrix_transform.hpp>
 #include <gtc/type_ptr.hpp>
 #include "RenderManager.h"
@@ -109,17 +109,7 @@ void Cube::Render(const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix
     glUniform3fv(glGetUniformLocation(shaderProgram, "moonColor"),     1, glm::value_ptr(lights.moonColor));
     glUniform1f (glGetUniformLocation(shaderProgram, "moonIntensity"),    lights.moonIntensity);
     glUniform1f (glGetUniformLocation(shaderProgram, "moonActive"),       lights.moonActive);
-    // Linterna
-    glUniform3fv(glGetUniformLocation(shaderProgram, "spotPosition"),  1, glm::value_ptr(lights.spotPosition));
-    glUniform3fv(glGetUniformLocation(shaderProgram, "spotDirection"), 1, glm::value_ptr(lights.spotDirection));
-    glUniform3fv(glGetUniformLocation(shaderProgram, "spotColor"),     1, glm::value_ptr(lights.spotColor));
-    glUniform1f (glGetUniformLocation(shaderProgram, "spotIntensity"),    lights.spotIntensity);
-    glUniform1f (glGetUniformLocation(shaderProgram, "spotInnerCos"),     lights.spotInnerCos);
-    glUniform1f (glGetUniformLocation(shaderProgram, "spotOuterCos"),     lights.spotOuterCos);
-    glUniform1f (glGetUniformLocation(shaderProgram, "spotRange"),        lights.spotRange);
-    glUniform1i (glGetUniformLocation(shaderProgram, "spotEnabled"),      lights.spotEnabled);
-
-    glBindVertexArray(vao);
+glBindVertexArray(vao);
     glDrawArrays(GL_TRIANGLES, 0, vertexCount);
     glBindVertexArray(0);
 

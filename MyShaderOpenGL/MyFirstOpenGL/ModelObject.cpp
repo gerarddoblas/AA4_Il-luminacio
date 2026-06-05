@@ -1,4 +1,4 @@
-#include "ModelObject.h"
+﻿#include "ModelObject.h"
 
 
 ModelObject::ModelObject(const std::string& modelPath, const std::string& texturePath)
@@ -52,28 +52,47 @@ ModelObject::~ModelObject()
 
 void ModelObject::Update(float dt) {}
 
-void ModelObject::Render(const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix)
+void ModelObject::Render(const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix, const LightData& lights)
 {
 	if (!isVisible) return;
 
 	glUseProgram(shaderProgram);
 
-	// Transform 
+	// Transform
 	glm::mat4 modelMat = transform->GetModelMatrix();
-	glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "modelMatrix"), 1, GL_FALSE, glm::value_ptr(modelMat));
+	glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "modelMatrix"),1, GL_FALSE, glm::value_ptr(modelMat));
 	glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "viewMatrix"), 1, GL_FALSE, glm::value_ptr(viewMatrix));
 	glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "projectionMatrix"), 1, GL_FALSE, glm::value_ptr(projectionMatrix));
 
 	// Tint del Color
 	glUniform4fv(glGetUniformLocation(shaderProgram, "tintColor"), 1, glm::value_ptr(tintColor));
 
+	// Unlit flag
+	glUniform1i(glGetUniformLocation(shaderProgram, "isUnlit"), isUnlit ? 1 : 0);
+
 	// Texture
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, textureID);
 	glUniform1i(glGetUniformLocation(shaderProgram, "textureSampler"), 0);
 
-	// Renderizo modelo
+	// Ambiente
+	glUniform3fv(glGetUniformLocation(shaderProgram, "ambientColor"), 1, glm::value_ptr(lights.ambientColor));
+	glUniform1f (glGetUniformLocation(shaderProgram, "ambientIntensity"), lights.ambientIntensity);
+
+	// Sol
+	glUniform3fv(glGetUniformLocation(shaderProgram, "sunDirection"), 1, glm::value_ptr(lights.sunDirection));
+	glUniform3fv(glGetUniformLocation(shaderProgram, "sunColor"),  1, glm::value_ptr(lights.sunColor));
+	glUniform1f (glGetUniformLocation(shaderProgram, "sunIntensity"), lights.sunIntensity);
+	glUniform1f (glGetUniformLocation(shaderProgram, "sunActive"), lights.sunActive);
+
+	// Luna
+	glUniform3fv(glGetUniformLocation(shaderProgram, "moonDirection"),1, glm::value_ptr(lights.moonDirection));
+	glUniform3fv(glGetUniformLocation(shaderProgram, "moonColor"), 1, glm::value_ptr(lights.moonColor));
+	glUniform1f (glGetUniformLocation(shaderProgram, "moonIntensity"),lights.moonIntensity);
+	glUniform1f (glGetUniformLocation(shaderProgram, "moonActive"), lights.moonActive);
+// Renderizo modelo
 	model->Render();
 
 	glUseProgram(0);
 }
+

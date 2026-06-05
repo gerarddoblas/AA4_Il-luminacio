@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="..\packages\Microsoft.Windows.CppWinRT.2.0.220531.1\build\native\Microsoft.Windows.CppWinRT.props" Condition="Exists('..\packages\Microsoft.Windows.CppWinRT.2.0.220531.1\build\native\Microsoft.Windows.CppWinRT.props')" />
   <ItemGroup Label="ProjectConfigurations">
@@ -22,6 +22,9 @@
   <ItemGroup>
     <ClCompile Include="MainScene.cpp" />
     <ClCompile Include="ModelObject.cpp" />
+    <ClCompile Include="Light.cpp" />
+    <ClCompile Include="DirectionalLight.cpp" />
+    <ClCompile Include="DayNightCycle.cpp" />
     <ClCompile Include="Model.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="Cube.cpp" />
@@ -47,6 +50,10 @@
   <ItemGroup>
     <ClInclude Include="MainScene.h" />
     <ClInclude Include="ModelObject.h" />
+    <ClInclude Include="LightData.h" />
+    <ClInclude Include="Light.h" />
+    <ClInclude Include="DirectionalLight.h" />
+    <ClInclude Include="DayNightCycle.h" />
     <ClInclude Include="Model.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="Cube.h" />
