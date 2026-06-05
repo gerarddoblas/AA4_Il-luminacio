@@ -7,11 +7,9 @@ Scene::~Scene()
 
 void Scene::OnExit()
 {
-
 	delete camera;
 	camera = nullptr;
 
-	// Destruimos todos los objetos de la escena
 	for (GameObject* o : objects) {
 		delete o;
 	}
@@ -20,7 +18,6 @@ void Scene::OnExit()
 
 void Scene::Update(float dt)
 {
-	// Control de destruccion de objetos
 	for (short i = objects.size() - 1; i >= 0; i--) {
 		if (objects[i]->isPendingDestroy) {
 			delete objects[i];
@@ -28,10 +25,8 @@ void Scene::Update(float dt)
 		}
 	}
 
-	//Actualizar la camara
 	camera->Update(dt);
 
-	// Actualizamos todos los objetos
 	for (GameObject* o : objects) {
 		if (o != nullptr && o->isVisible) {
 			o->Update(dt);
@@ -41,20 +36,55 @@ void Scene::Update(float dt)
 
 void Scene::Render()
 {
-
-	// Generamos matrices de cámara
-	glm::mat4 viewMatrix = camera->GetViewMatrix();
+	glm::mat4 viewMatrix       = camera->GetViewMatrix();
 	glm::mat4 projectionMatrix = camera->GetProjectionMatrix((float)WINDOW_WIDTH / (float)WINDOW_HEIGHT);
 
-	// El render de la escena simplemente le pide a cada objeto que se dibuje
+	
+	LightData lights;
+	lights.ambientColor     = ambientColor;
+	lights.ambientIntensity = ambientIntensity;
+
+	for (GameObject* o : objects)
+	{
+		DirectionalLight* dl = dynamic_cast<DirectionalLight*>(o);
+		if (dl)
+		{
+			if (dl->tag == "sun")
+			{
+				lights.sunDirection = dl->GetDirection();
+				lights.sunColor     = dl->color;
+				lights.sunIntensity = dl->intensity;
+				lights.sunActive    = dl->isVisible ? 1.0f : 0.0f;
+			}
+			else if (dl->tag == "moon")
+			{
+				lights.moonDirection = dl->GetDirection();
+				lights.moonColor     = dl->color;
+				lights.moonIntensity = dl->intensity;
+				lights.moonActive    = dl->isVisible ? 1.0f : 0.0f;
+			}
+		}
+	}
+
 	for (GameObject* o : objects) {
 		if (o != nullptr && o->isVisible) {
-			o->Render(viewMatrix, projectionMatrix);
+			o->Render(viewMatrix, projectionMatrix, lights);
 		}
 	}
 }
 
 void Scene::AddGameObject(GameObject* obj) { if (obj != nullptr) objects.push_back(obj); }
+
+std::vector<Light*> Scene::GetLights()
+{
+	std::vector<Light*> lights;
+	for (GameObject* o : objects)
+	{
+		Light* l = dynamic_cast<Light*>(o);
+		if (l) lights.push_back(l);
+	}
+	return lights;
+}
 
 GameObject* Scene::FindByTag(const std::string& tag)
 {

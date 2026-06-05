@@ -1,4 +1,4 @@
-#include "RenderManager.h"
+﻿#include "RenderManager.h"
 #include "InputManager.h"
 #include <cassert>
 
@@ -84,7 +84,7 @@ GLuint RenderManager::LoadVertexShader(const std::string& filePath)
 	const char* src = source.c_str();
 	GLuint shader = glCreateShader(GL_VERTEX_SHADER);
 	glShaderSource(shader, 1, &src, nullptr);
-	glCompileShader(shader);
+	glCompileShader(shader); GLint success; glGetShaderiv(shader, GL_COMPILE_STATUS, &success); if(!success) { char infoLog[512]; glGetShaderInfoLog(shader, 512, NULL, infoLog); std::cout << "SHADER COMPILE ERROR in " << filePath << ":\n" << infoLog << std::endl; }
 
 	cacheShaders[filePath] = shader;
 	return shader;
@@ -100,7 +100,7 @@ GLuint RenderManager::LoadFragmentShader(const std::string& filePath)
 	const char* src = source.c_str();
 	GLuint shader = glCreateShader(GL_FRAGMENT_SHADER);
 	glShaderSource(shader, 1, &src, nullptr);
-	glCompileShader(shader);
+	glCompileShader(shader); GLint success; glGetShaderiv(shader, GL_COMPILE_STATUS, &success); if(!success) { char infoLog[512]; glGetShaderInfoLog(shader, 512, NULL, infoLog); std::cout << "SHADER COMPILE ERROR in " << filePath << ":\n" << infoLog << std::endl; }
 
 	cacheShaders[filePath] = shader;
 	return shader;
@@ -116,7 +116,7 @@ GLuint RenderManager::LoadGeometryShader(const std::string& filePath)
 	const char* src = source.c_str();
 	GLuint shader = glCreateShader(GL_GEOMETRY_SHADER);
 	glShaderSource(shader, 1, &src, nullptr);
-	glCompileShader(shader);
+	glCompileShader(shader); GLint success; glGetShaderiv(shader, GL_COMPILE_STATUS, &success); if(!success) { char infoLog[512]; glGetShaderInfoLog(shader, 512, NULL, infoLog); std::cout << "SHADER COMPILE ERROR in " << filePath << ":\n" << infoLog << std::endl; }
 
 	cacheShaders[filePath] = shader;
 	return shader;
