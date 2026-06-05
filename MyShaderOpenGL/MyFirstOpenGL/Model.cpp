@@ -13,6 +13,7 @@ Model::Model(const std::vector<float>& vertexs, const std::vector<float>& uvs, c
     glGenVertexArrays(1, &this->VAO);
     glGenBuffers(1, &this->VBO);
     glGenBuffers(1, &this->uvVBO);
+    glGenBuffers(1, &this->normalVBO);
     //Defino el VAO creado como activo
     glBindVertexArray(this->VAO);
 
@@ -21,18 +22,25 @@ Model::Model(const std::vector<float>& vertexs, const std::vector<float>& uvs, c
     glBufferData(GL_ARRAY_BUFFER, vertexs.size() * sizeof(float), vertexs.data(), GL_STATIC_DRAW);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
 
-    //Defino el VBO de las posiciones como activo, le paso los datos y lo configuro
+    //Defino el VBO de las UVs como activo, le paso los datos y lo configuro
     glBindBuffer(GL_ARRAY_BUFFER, this->uvVBO);
     glBufferData(GL_ARRAY_BUFFER, uvs.size() * sizeof(float), uvs.data(), GL_STATIC_DRAW);
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)0);
 
-    //Activamos el atributo 0 (posiciones por defecto)
+    //Defino el VBO de normales como activo, le paso los datos y lo configuro
+    glBindBuffer(GL_ARRAY_BUFFER, this->normalVBO);
+    glBufferData(GL_ARRAY_BUFFER, normals.size() * sizeof(float), normals.data(), GL_STATIC_DRAW);
+    glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+
+    //Activamos los tres atributos
     glEnableVertexAttribArray(0);
     glEnableVertexAttribArray(1);
+    glEnableVertexAttribArray(2);
 
     //Desvinculamos VAO y VBO
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);  
+
 
 }
 
@@ -125,36 +133,56 @@ Model LoadOBJModel(const std::string& filePath) {
 		//Estoy leyendo una cara
 		else if (prefix == "f") {
 
-			int vertexData;
-			short counter = 0;
+			std::string token;
+			std::vector<std::string> faceTokens;
+			while (ss >> token) {
+				faceTokens.push_back(token);
+			}
 
-			//Obtengo todos los valores hasta un espacio
-			while (ss >> vertexData) {
+			// Triangulacion de poligonos (Triangle Fan)
+			for (size_t i = 1; i + 1 < faceTokens.size(); i++) {
+				std::string tokensToParse[3] = { faceTokens[0], faceTokens[i], faceTokens[i + 1] };
 
-				//En orden cada numero sigue el patron de vertice/uv/normal
-				switch (counter) {
-				case 0:
-					//Si es un vertice lo almaceno - 1 por el offset y almaceno dos seguidos al ser un vec3, salto 1 / y aumento el contador en 1
-					vertexs.push_back(tmpVertexs[(vertexData - 1) * 3]);
-					vertexs.push_back(tmpVertexs[((vertexData - 1) * 3) + 1]);
-					vertexs.push_back(tmpVertexs[((vertexData - 1) * 3) + 2]);
-					ss.ignore(1, '/');
-					counter++;
-					break;
-				case 1:
-					//Si es un uv lo almaceno - 1 por el offset y almaceno dos seguidos al ser un vec2, salto 1 / y aumento el contador en 1
-					textureCoordinates.push_back(tmpTextureCoordinates[(vertexData - 1) * 2]);
-					textureCoordinates.push_back(tmpTextureCoordinates[((vertexData - 1) * 2) + 1]);
-					ss.ignore(1, '/');
-					counter++;
-					break;
-				case 2:
-					//Si es una normal la almaceno - 1 por el offset y almaceno tres seguidos al ser un vec3, salto 1 / y reinicio
-					vertexNormal.push_back(tmpNormals[(vertexData - 1) * 3]);
-					vertexNormal.push_back(tmpNormals[((vertexData - 1) * 3) + 1]);
-					vertexNormal.push_back(tmpNormals[((vertexData - 1) * 3) + 2]);
-					counter = 0;
-					break;
+				for (int j = 0; j < 3; j++) {
+					std::stringstream tokenStream(tokensToParse[j]);
+					std::string vStr, vtStr, vnStr;
+
+					std::getline(tokenStream, vStr, '/');
+					std::getline(tokenStream, vtStr, '/');
+					std::getline(tokenStream, vnStr, '/');
+
+					int vIdx = vStr.empty() ? -1 : std::stoi(vStr) - 1;
+					int vtIdx = vtStr.empty() ? -1 : std::stoi(vtStr) - 1;
+					int vnIdx = vnStr.empty() ? -1 : std::stoi(vnStr) - 1;
+
+					// Push Vertex
+					if (vIdx >= 0 && vIdx * 3 + 2 < tmpVertexs.size()) {
+						vertexs.push_back(tmpVertexs[vIdx * 3]);
+						vertexs.push_back(tmpVertexs[vIdx * 3 + 1]);
+						vertexs.push_back(tmpVertexs[vIdx * 3 + 2]);
+					} else {
+						vertexs.push_back(0.0f); vertexs.push_back(0.0f); vertexs.push_back(0.0f);
+					}
+
+					// Push UV
+					if (vtIdx >= 0 && vtIdx * 2 + 1 < tmpTextureCoordinates.size()) {
+						textureCoordinates.push_back(tmpTextureCoordinates[vtIdx * 2]);
+						textureCoordinates.push_back(tmpTextureCoordinates[vtIdx * 2 + 1]);
+					} else {
+						textureCoordinates.push_back(0.0f); textureCoordinates.push_back(0.0f);
+					}
+
+					// Push Normal
+					if (vnIdx >= 0 && vnIdx * 3 + 2 < tmpNormals.size()) {
+						vertexNormal.push_back(tmpNormals[vnIdx * 3]);
+						vertexNormal.push_back(tmpNormals[vnIdx * 3 + 1]);
+						vertexNormal.push_back(tmpNormals[vnIdx * 3 + 2]);
+					} else {
+						// Si no hay normal, asignamos una por defecto
+						vertexNormal.push_back(0.0f);
+						vertexNormal.push_back(0.0f);
+						vertexNormal.push_back(1.0f);
+					}
 				}
 			}
 		}
