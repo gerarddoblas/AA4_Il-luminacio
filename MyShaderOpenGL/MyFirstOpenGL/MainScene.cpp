@@ -148,27 +148,5 @@ void MainScene::OnEnter()
 
 void MainScene::Update(float dt)
 {
-    if (IM->GetKey(GLFW_KEY_1, DOWN))
-    {
-        camera->SetTarget(FindByTag("troll2"));
-        camera->SetPositionFromTarget(glm::vec3(0.0f, 2.0f, 3.0f));
-        camera->SetMode(CameraMode::STATIC);
-    }
-
-    if (IM->GetKey(GLFW_KEY_2, DOWN))
-    {
-        camera->SetTarget(FindByTag("troll3"));
-        camera->SetPositionFromTarget(glm::vec3(0.0f, 1.0f, 0.7f));
-        camera->SetMode(CameraMode::STATIC);
-
-    }
-
-    if (IM->GetKey(GLFW_KEY_3, DOWN))
-    {
-        camera->SetTarget(FindByTag("troll4"));
-        camera->SetPositionFromTarget(glm::vec3(0.0f, 1.5f, 5.0f));
-        camera->SetMode(CameraMode::DOLLYZOOM);
-    }
-
     Scene::Update(dt);
 }
