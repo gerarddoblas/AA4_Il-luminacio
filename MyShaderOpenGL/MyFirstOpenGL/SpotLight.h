@@ -11,7 +11,7 @@ public:
 
     SpotLight();
 
-    void Update(float dt) override {}
+    void Update(float dt) override;
 
     glm::vec3 GetDirection() const;
     glm::vec3 GetPosition()  const { return transform->position; }

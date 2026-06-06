@@ -8,6 +8,7 @@
 #include "InputManager.h"
 #include "LightData.h"
 #include "DirectionalLight.h"
+#include "SpotLight.h"
 
 class Scene {
 protected:
