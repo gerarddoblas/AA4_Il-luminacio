@@ -192,7 +192,6 @@ void MainScene::Update(float dt)
     if (moon && moonVisual)
     {
         moonVisual->GetTransform()->position = moon->GetTransform()->position;
-        moonVisual->GetTransform()->rotation = moon->GetTransform()->rotation;
     }
 
     // color del sky sigue cycle nightday
