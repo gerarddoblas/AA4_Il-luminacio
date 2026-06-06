@@ -1,83 +1,60 @@
 #include "Camera.h"
+#include "InputManager.h"
 
-Camera::Camera()
-	: GameObject()
+Camera::Camera() : GameObject()
 {
-	mode = CameraMode::ORB;
-	transform->position = glm::vec3(0.0f, orbitHeight, 0.0f);
-	target = defaultTarget;
+    transform->position = glm::vec3(0.0f, 0.5f, 4.0f);
 }
 
 void Camera::Update(float dt)
 {
-	switch (mode)
-	{
-	case CameraMode::ORB:
-	{
-		angle += speed * dt;
-		transform->position = glm::vec3(target.x + radius * cos(angle), transform->position.y, target.z + radius * sin(angle));
-	}
-		break;
+    float deltaX = (float)IM->GetMouseDeltaX() * mouseSensitivity;
+    float deltaY = (float)IM->GetMouseDeltaY() * mouseSensitivity;
 
-	case CameraMode::STATIC:
-		break;
+    yaw += deltaX;
+    pitch -= deltaY;
+    pitch = glm::clamp(pitch, -89.0f, 89.0f);
 
-	case CameraMode::DOLLYZOOM:
-	{
-		dollyZoomTimer += dt;
+    glm::vec3 forward = GetForward();
+    glm::vec3 right = GetRight();
 
-		//Clampeo la duración para simplemente poner si es más grande que 1
-		float _clamp = glm::clamp(dollyZoomTimer / dollyZoomDuration, 0.0f, 1.0f);
-		fFov = fFovDollyZoomStart + (fFovDollyZoomEnd - fFovDollyZoomStart) * _clamp;
+    if (IM->GetKey(GLFW_KEY_W, HOLD) || IM->GetKey(GLFW_KEY_W, DOWN))
+        transform->position += forward * moveSpeed * dt;
 
-		transform->position = dollyZoomPos + (target - dollyZoomPos) * _clamp;
+    if (IM->GetKey(GLFW_KEY_S, HOLD) || IM->GetKey(GLFW_KEY_S, DOWN))
+        transform->position -= forward * moveSpeed * dt;
 
-		if (_clamp >= 1.0f)
-		{
-			SetMode(CameraMode::ORB);
-			target = defaultTarget;
-		}
-	}
-		break;
-	default:
-		break;
-	}
+    if (IM->GetKey(GLFW_KEY_D, HOLD) || IM->GetKey(GLFW_KEY_D, DOWN))
+        transform->position += right * moveSpeed * dt;
+
+    if (IM->GetKey(GLFW_KEY_A, HOLD) || IM->GetKey(GLFW_KEY_A, DOWN))
+        transform->position -= right * moveSpeed * dt;
 }
 
-void Camera::SetTarget(GameObject* gameObject)
+glm::vec3 Camera::GetForward() const
 {
-	if (gameObject != nullptr)
-		target = gameObject->GetTransform()->position;
+    glm::vec3 forward;
+    forward.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
+    forward.y = sin(glm::radians(pitch));
+    forward.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
+    return glm::normalize(forward);
 }
 
-void Camera::SetMode(CameraMode newMode)
+glm::vec3 Camera::GetRight() const
 {
-	mode = newMode;
-
-	switch (mode)
-	{
-	case CameraMode::ORB:
-		fFov = fFovOrbit;
-		transform->position.y = orbitHeight;
-		break;
-
-	case CameraMode::STATIC:
-		fFov = fFovStatic;
-		break;
-
-	case CameraMode::DOLLYZOOM:
-		fFov = fFovDollyZoomStart;
-		dollyZoomTimer = 0.0f;
-		dollyZoomPos = transform->position;
-		break;
-	default:
-		mode = CameraMode::ORB;
-		break;
-	}
+    return glm::normalize(glm::cross(GetForward(), localVectorUp));
 }
 
-void Camera::SetPositionFromTarget(glm::vec3 offset) { transform->position = target + offset; }
+glm::mat4 Camera::GetViewMatrix() const
+{
+    return glm::lookAt(
+        transform->position,
+        transform->position + GetForward(),
+        localVectorUp
+    );
+}
 
-glm::mat4 Camera::GetViewMatrix() const { return glm::lookAt(transform->position, target, localVectorUp); }
-
-glm::mat4 Camera::GetProjectionMatrix(float aspectRatio) const { return glm::perspective(glm::radians(fFov), aspectRatio, fnear, fFar); }
+glm::mat4 Camera::GetProjectionMatrix(float aspectRatio) const
+{
+    return glm::perspective(glm::radians(fFov), aspectRatio, fnear, fFar);
+}

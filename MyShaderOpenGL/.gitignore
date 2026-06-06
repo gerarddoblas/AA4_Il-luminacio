@@ -430,5 +430,4 @@ FodyWeavers.xsd
 *.msp
 
 # Force-include specific OBJ models
-!Assets/Modelos/rock.obj
-!Assets/Modelos/troll.obj
+!Assets/Modelos/*.obj

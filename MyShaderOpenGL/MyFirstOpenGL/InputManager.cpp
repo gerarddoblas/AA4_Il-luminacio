@@ -7,6 +7,7 @@ void InputManager::Init(GLFWwindow* newWindow)
 
     glfwSetKeyCallback(window, KeyBoardCallBack);
     glfwSetMouseButtonCallback(window, MouseCallBack);
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED); 
 }
 
 void InputManager::Listen()
@@ -19,7 +20,17 @@ void InputManager::Listen()
             it->second = RELEASED;
     }
 
+    prevMouseX = mouseX;
+    prevMouseY = mouseY;
+
     glfwGetCursorPos(window, &mouseX, &mouseY);
+
+    if(firstMouseRead)
+    {
+        prevMouseX = mouseX;
+        prevMouseY = mouseY;
+        firstMouseRead = false;
+    }
 
     glfwPollEvents();
 }
@@ -27,6 +38,9 @@ void InputManager::Listen()
 double InputManager::GetMouseX() const { return mouseX; }
 
 double InputManager::GetMouseY() const { return mouseY; }
+
+double InputManager::GetMouseDeltaX() const { return mouseX - prevMouseX; }
+double InputManager::GetMouseDeltaY() const { return mouseY - prevMouseY; }
 
 bool InputManager::GetKey(GLuint input, KeyState inputValue) { return keyReference[input] == inputValue; }
 

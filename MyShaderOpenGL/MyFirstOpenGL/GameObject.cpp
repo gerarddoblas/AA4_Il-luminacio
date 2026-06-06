@@ -6,7 +6,7 @@ GameObject::GameObject()
 	meshRenderer = new MeshRenderer();
 }
 
-void GameObject::Render(const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix) {}
+void GameObject::Render(const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix, const LightData& lights) {}
 
 GameObject::~GameObject()
 {
