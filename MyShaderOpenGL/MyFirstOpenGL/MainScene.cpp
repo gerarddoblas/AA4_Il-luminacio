@@ -7,10 +7,14 @@ void MainScene::OnEnter()
     // Camara
     camera = new Camera();
 
+    flashlight = new SpotLight();
+    flashlight->SetTag("flashlight");
+    AddGameObject(flashlight);
+
     // Sun
     sun = new DirectionalLight();
     sun->SetTag("sun");
-    sun->color     = glm::vec3(1.0f, 0.95f, 0.8f);
+    sun->color = glm::vec3(1.0f, 0.95f, 0.8f);
     sun->intensity = 1.0f;
     AddGameObject(sun);
 
@@ -24,7 +28,7 @@ void MainScene::OnEnter()
     // Moon
     moon = new DirectionalLight();
     moon->SetTag("moon");
-    moon->color     = glm::vec3(0.4f, 0.5f, 0.8f);
+    moon->color = glm::vec3(0.4f, 0.5f, 0.8f);
     moon->intensity = 0.4f;
     AddGameObject(moon);
 
@@ -46,15 +50,21 @@ void MainScene::OnEnter()
     };
     AddGameObject(dayNightCycle);
 
-    const std::string MODEL_PATHS[2] =
+    const short NUM_MODELS = 4;
+
+    const std::string MODEL_PATHS[NUM_MODELS] =
     {
         "../Assets/Modelos/troll.obj",
         "../Assets/Modelos/rock.obj",
+        "../Assets/Modelos/Primarina.obj",
+        "../Assets/Modelos/TapuFini.obj",
     };
-    const std::string TEXTURE_PATHS[2] =
+    const std::string TEXTURE_PATHS[NUM_MODELS] =
     {
         "../Assets/Texturas/troll.png",
         "../Assets/Texturas/rock.png",
+        "../Assets/Texturas/Primarina.png",
+        "../Assets/Texturas/TapuFini.png",
     };
 
     const glm::vec3 SPAWN_POINTS[] = 
@@ -84,21 +94,27 @@ void MainScene::OnEnter()
 
     const short NUM_SPAWN_POINTS = 21;
 
-    const float SCALE_MIN[3] = { 0.25f, 0.25f, 0.20f };
-    const float SCALE_MAX[3] = { 0.35f, 0.40f, 0.35f };
+    const float SCALE_MIN[NUM_MODELS] = { 0.25f, 0.25f, 0.003f, 0.003f};
+    const float SCALE_MAX[NUM_MODELS] = { 0.35f, 0.40f, 0.004f, 0.004f};
+
+    const float ROTX_MIN = -8.0f;
+    const float ROTX_MAX = 8.0f;
+    const float ROTY_MIN = 0.0f;
+    const float ROTY_MAX = 360.0f;
 
     for (short i = 0; i < NUM_SPAWN_POINTS; i++)
     {
         //Elegir modelo aleatorio
-        short modelIndex = rand() % 2;
+        short modelIndex = rand() % NUM_MODELS;
 
         //Escala aleatoria
         float scale = RandomRange(SCALE_MIN[modelIndex], SCALE_MAX[modelIndex]);
         //Rotacion aleatoria
-        float rotY = RandomRange(0.0f, 360.0f);
-        float rotX = RandomRange(-8.0f, 8.0f);
+        float rotY = RandomRange(ROTY_MIN, ROTY_MAX);
+        float rotX = RandomRange(-ROTX_MIN, ROTX_MAX);
 
         ModelObject* obj = new ModelObject(MODEL_PATHS[modelIndex], TEXTURE_PATHS[modelIndex]);
+
         obj->GetTransform()->position = SPAWN_POINTS[i];
         obj->GetTransform()->scale = glm::vec3(scale);
         obj->GetTransform()->rotation = glm::vec3(rotX, rotY, 0.0f);

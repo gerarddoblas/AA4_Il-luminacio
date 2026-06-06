@@ -1,7 +1,14 @@
 #include "SpotLight.h"
 #include <gtc/matrix_transform.hpp>
+#include "InputManager.h"
 
 SpotLight::SpotLight() : Light() {}
+
+void SpotLight::Update(float dt)
+{
+    if (IM->GetKey(GLFW_KEY_F, DOWN))
+        enabled = !enabled;
+}
 
 glm::vec3 SpotLight::GetDirection() const
 {
