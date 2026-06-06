@@ -960,4 +960,235 @@ void ModelObject::Render(const glm::mat4& viewMatrix, const glm::mat4& projectio
 	glUseProgram(0);
 }
 
+Pregunta
+Como paso las lights por la escena para que se pinten en realTime
+
+RESPUESTA
+
+void Scene::Render()
+{
+    // Obtenemos la posición y perspectiva de la cámara
+    glm::mat4 viewMatrix       = camera->GetViewMatrix();
+    glm::mat4 projectionMatrix = camera->GetProjectionMatrix((float)WINDOW_WIDTH / (float)WINDOW_HEIGHT);
+    // PASO 1: Preparamos el "maletín" vacío (LightData) y le metemos el color ambiente
+    LightData lights;
+    lights.ambientColor     = ambientColor;
+    lights.ambientIntensity = ambientIntensity;
+    // PASO 2: Hacemos un barrido para buscar al Sol y a la Luna y robarles sus datos
+    for (GameObject* o : objects)
+    {
+        DirectionalLight* dl = dynamic_cast<DirectionalLight*>(o);
+        if (dl)
+        {
+            if (dl->tag == "sun")
+            {
+                lights.sunDirection = dl->GetDirection();
+                lights.sunColor     = dl->color;
+                lights.sunIntensity = dl->intensity;
+                lights.sunActive    = dl->isVisible ? 1.0f : 0.0f; // 0.0f si bajó del suelo
+            }
+            else if (dl->tag == "moon")
+            {
+                lights.moonDirection = dl->GetDirection();
+                lights.moonColor     = dl->color;
+                lights.moonIntensity = dl->intensity;
+                lights.moonActive    = dl->isVisible ? 1.0f : 0.0f;
+            }
+        }
+    }
+    // PASO 3: Hacemos un último barrido enviando el "maletín" lleno (lights) a todo el mundo
+    for (GameObject* o : objects) {
+        if (o != nullptr && o->isVisible) {
+            
+            // Aquí es donde se lo enchufamos a los Trolls, Rocas y el Suelo
+            o->Render(viewMatrix, projectionMatrix, lights);
+            
+        }
+    }
+}
+
+Pregunta: Lo mismo de las luces lo puedes hacer para el daynight cycle que te acabo de pasar 
+
+Respuesta:
+void DayNightCycle::Update(float dt)
+{
+    
+    float degreesPerSecond = 360.0f / cycleDuration;
+    angleDeg += degreesPerSecond * dt;
+    if (angleDeg >= 360.0f) angleDeg -= 360.0f;
+
+    //180 grados entre si
+    ApplyOrbitToLight(sun,  angleDeg);
+    ApplyOrbitToLight(moon, angleDeg + 180.0f);
+
+    // angulo 90 = sol
+    float t = sin(glm::radians(angleDeg));
+
+    // Calculamos el ambient de este momento y avisamos a quien escuche
+    if (onAmbientChanged)
+    {
+        onAmbientChanged(CalcAmbientColor(t), CalcAmbientIntensity(t));
+    }
+}
+
+void DayNightCycle::ApplyOrbitToLight(DirectionalLight* light, float deg)
+{
+    // Z fijo
+    
+    float rad = glm::radians(deg);
+    glm::vec3 pos = glm::vec3(sin(rad) * orbitRadius, cos(rad) * orbitRadius, 0.0f);
+    light->GetTransform()->position = pos;
+
+    // direccion luz
+    glm::vec3 dir = glm::normalize(-pos);
+
+    // Convertimos la direccion a yaw/pitch para que GetDirection() devuelva lo correcto
+    // pitch = asin(dir.y),  yaw = atan2(dir.z, dir.x)
+    //IA
+    float pitch = glm::degrees(asin(dir.y));
+    float yaw = glm::degrees(atan2(dir.z, dir.x));
+    light->GetTransform()->rotation = glm::vec3(yaw, pitch, 0.0f);
+
+    // solo ilumina si Y positiva
+    float sunHeight = pos.y;
+    light->isVisible = (sunHeight > 0.0f);
+}
+
+glm::vec3 DayNightCycle::CalcAmbientColor(float t) const
+{
+    
+    // t: -1 = medianoche, 0 = amanecer/atardecer, 1 = mediodia
+    glm::vec3 night = glm::vec3(0.05f, 0.05f, 0.15f);
+    glm::vec3 day   = glm::vec3(0.9f,  0.85f, 0.6f);
+    float factor = (t + 1.0f) * 0.5f;
+    return glm::mix(night, day, factor);
+}
+
+float DayNightCycle::CalcAmbientIntensity(float t) const
+{
+    // De noche el ambiente es debil (0.05), de dia es visible (0.35)
+    float factor = (t + 1.0f) * 0.5f;
+    return glm::mix(0.05f, 0.35f, factor);
+
+}
+
+PREGUNTA: EL cube que te he pasado le faltan los nuevos VBO y los vao ponlos
+
+RESPUESTA: #include "Cube.h"
+#include <gtc/matrix_transform.hpp>
+#include <gtc/type_ptr.hpp>
+#include "RenderManager.h"
+
+Cube::Cube(glm::vec3 position, glm::vec3 scale)
+{
+    RenderManager::ShaderProgram shaders;
+    shaders.vertexShader   = RM->LoadVertexShader("PrimitiveVertexShader.glsl");
+    shaders.fragmentShader = RM->LoadFragmentShader("PrimitiveFragmentShader.glsl");
+    shaderProgram = RM->CreateProgram(shaders);
+
+    // Posicion (x,y,z) y normal (nx,ny,nz) por vertice - stride 6 floats
+    float vertices[] = {
+        // Cara trasera  (normal 0,0,-1)
+        -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+         0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+         0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+         0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+        -0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+        -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+        // Cara frontal  (normal 0,0,1)
+        -0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
+         0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
+         0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
+         0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
+        -0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
+        -0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
+        // Cara izquierda (normal -1,0,0)
+        -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
+        -0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
+        -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
+        -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
+        -0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
+        -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
+        // Cara derecha  (normal 1,0,0)
+         0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
+         0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
+         0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
+         0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
+         0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
+         0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
+        // Cara inferior (normal 0,-1,0)
+        -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
+         0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
+         0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
+         0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
+        -0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
+        -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
+        // Cara superior (normal 0,1,0)
+        -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,
+         0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,
+         0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
+         0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
+        -0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
+        -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,
+    };
+
+    // VAO propio con stride 6 (pos + normal intercalados)
+    glGenVertexArrays(1, &vao);
+    glGenBuffers(1, &vbo);
+    glBindVertexArray(vao);
+    glBindBuffer(GL_ARRAY_BUFFER, vbo);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+    // location 0 - posicion
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
+    // location 1 - normal
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
+    glEnableVertexAttribArray(1);
+
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindVertexArray(0);
+
+    transform->position = position;
+    transform->rotation = glm::vec3(0.0f);
+    transform->scale    = scale;
+}
+
+void Cube::Update(float dt) {}
+
+void Cube::Render(const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix, const LightData& lights)
+{
+    glUseProgram(shaderProgram);
+
+    glm::mat4 T = transform->GetTranslationMatrix();
+    glm::mat4 R = transform->GetRotationMatrix();
+    glm::mat4 S = transform->GetScaleMatrix();
+
+    glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "translationMatrix"), 1, GL_FALSE, glm::value_ptr(T));
+    glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "rotationMatrix"),    1, GL_FALSE, glm::value_ptr(R));
+    glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "scaleMatrix"),       1, GL_FALSE, glm::value_ptr(S));
+    glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "viewMatrix"),        1, GL_FALSE, glm::value_ptr(viewMatrix));
+    glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "projectionMatrix"),  1, GL_FALSE, glm::value_ptr(projectionMatrix));
+
+    glUniform3fv(glGetUniformLocation(shaderProgram, "baseColor"), 1, glm::value_ptr(baseColor));
+
+    // Ambiente
+    glUniform3fv(glGetUniformLocation(shaderProgram, "ambientColor"),     1, glm::value_ptr(lights.ambientColor));
+    glUniform1f (glGetUniformLocation(shaderProgram, "ambientIntensity"),    lights.ambientIntensity);
+    // Sol
+    glUniform3fv(glGetUniformLocation(shaderProgram, "sunDirection"),  1, glm::value_ptr(lights.sunDirection));
+    glUniform3fv(glGetUniformLocation(shaderProgram, "sunColor"),      1, glm::value_ptr(lights.sunColor));
+    glUniform1f (glGetUniformLocation(shaderProgram, "sunIntensity"),     lights.sunIntensity);
+    glUniform1f (glGetUniformLocation(shaderProgram, "sunActive"),        lights.sunActive);
+    // Luna
+    glUniform3fv(glGetUniformLocation(shaderProgram, "moonDirection"), 1, glm::value_ptr(lights.moonDirection));
+    glUniform3fv(glGetUniformLocation(shaderProgram, "moonColor"),     1, glm::value_ptr(lights.moonColor));
+    glUniform1f (glGetUniformLocation(shaderProgram, "moonIntensity"),    lights.moonIntensity);
+    glUniform1f (glGetUniformLocation(shaderProgram, "moonActive"),       lights.moonActive);
+glBindVertexArray(vao);
+    glDrawArrays(GL_TRIANGLES, 0, vertexCount);
+    glBindVertexArray(0);
+
+    glUseProgram(0);
+}
 
