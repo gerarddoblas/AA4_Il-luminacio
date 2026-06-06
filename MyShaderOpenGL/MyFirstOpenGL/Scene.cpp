@@ -36,12 +36,12 @@ void Scene::Update(float dt)
 
 void Scene::Render()
 {
-	glm::mat4 viewMatrix       = camera->GetViewMatrix();
+	glm::mat4 viewMatrix = camera->GetViewMatrix();
 	glm::mat4 projectionMatrix = camera->GetProjectionMatrix((float)WINDOW_WIDTH / (float)WINDOW_HEIGHT);
 
 	
 	LightData lights;
-	lights.ambientColor     = ambientColor;
+	lights.ambientColor = ambientColor;
 	lights.ambientIntensity = ambientIntensity;
 
 	for (GameObject* o : objects)
@@ -52,18 +52,32 @@ void Scene::Render()
 			if (dl->tag == "sun")
 			{
 				lights.sunDirection = dl->GetDirection();
-				lights.sunColor     = dl->color;
+				lights.sunColor = dl->color;
 				lights.sunIntensity = dl->intensity;
-				lights.sunActive    = dl->isVisible ? 1.0f : 0.0f;
+				lights.sunActive = dl->isVisible ? 1.0f : 0.0f;
 			}
 			else if (dl->tag == "moon")
 			{
 				lights.moonDirection = dl->GetDirection();
-				lights.moonColor     = dl->color;
+				lights.moonColor = dl->color;
 				lights.moonIntensity = dl->intensity;
-				lights.moonActive    = dl->isVisible ? 1.0f : 0.0f;
+				lights.moonActive = dl->isVisible ? 1.0f : 0.0f;
 			}
 		}
+	}
+
+	SpotLight* sl = dynamic_cast<SpotLight*>(FindByTag("flashlight"));
+	if (sl)
+	{
+		sl->GetTransform()->position = camera->GetTransform()->position;
+		sl->GetTransform()->rotation = glm::vec3(camera->yaw, camera->pitch, 0.0f);
+
+		lights.spotPosition = sl->GetPosition();
+		lights.spotDirection = sl->GetDirection();
+		lights.spotInnerCos = sl->GetInnerCos();
+		lights.spotOuterCos = sl->GetOuterCos();
+		lights.spotRange = sl->range;
+		lights.spotEnabled = sl->enabled ? 1 : 0;
 	}
 
 	for (GameObject* o : objects) {

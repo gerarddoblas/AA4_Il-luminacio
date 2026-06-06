@@ -28,3 +28,14 @@ glm::vec3 Camera::GetForward() const
     forward.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
     return glm::normalize(forward);
 }
+
+Tambien se ha utilizado los LLM para la siguiente tool
+
+
+Prompt:
+
+Estoy reutilizando el código para hacer que la escala y la rotación sea aleatoria, puedes ayudarme a optimizar esto en mi clase Utils.h y .cpp?
+
+float RandomRange(float min, float max) { return min + (static_cast<float>(rand()) / static_cast<float>(RAND_MAX)) * (max - min); }
+
+I poder evitar replicar código.

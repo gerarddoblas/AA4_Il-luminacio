@@ -90,6 +90,16 @@ void ModelObject::Render(const glm::mat4& viewMatrix, const glm::mat4& projectio
 	glUniform3fv(glGetUniformLocation(shaderProgram, "moonColor"), 1, glm::value_ptr(lights.moonColor));
 	glUniform1f (glGetUniformLocation(shaderProgram, "moonIntensity"),lights.moonIntensity);
 	glUniform1f (glGetUniformLocation(shaderProgram, "moonActive"), lights.moonActive);
+
+	//SpotLigth
+	glUniform3fv(glGetUniformLocation(shaderProgram, "spotPosition"), 1, glm::value_ptr(lights.spotPosition));
+	glUniform3fv(glGetUniformLocation(shaderProgram, "spotDirection"), 1, glm::value_ptr(lights.spotDirection));
+	glUniform3fv(glGetUniformLocation(shaderProgram, "spotColor"), 1, glm::value_ptr(lights.spotColor));
+	glUniform1f(glGetUniformLocation(shaderProgram, "spotIntensity"), lights.spotIntensity);
+	glUniform1f(glGetUniformLocation(shaderProgram, "spotInnerCos"), lights.spotInnerCos);
+	glUniform1f(glGetUniformLocation(shaderProgram, "spotOuterCos"), lights.spotOuterCos);
+	glUniform1f(glGetUniformLocation(shaderProgram, "spotRange"), lights.spotRange);
+	glUniform1i(glGetUniformLocation(shaderProgram, "spotEnabled"), lights.spotEnabled);
 // Renderizo modelo
 	model->Render();
 

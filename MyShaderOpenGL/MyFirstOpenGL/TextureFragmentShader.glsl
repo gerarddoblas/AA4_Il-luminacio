@@ -86,6 +86,6 @@ void main()
     vec3 moon     = CalcDirectional(moonDirection, moonColor, moonIntensity, moonActive);
     vec3 spot     = CalcSpot();
 
-    vec3 lighting = ambient + sun + moon;
+    vec3 lighting = ambient + sun + moon + spot;
     fragColor     = vec4(texColor.rgb * lighting, texColor.a);
 }
