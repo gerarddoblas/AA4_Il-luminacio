@@ -69,27 +69,27 @@ void MainScene::OnEnter()
 
     const glm::vec3 SPAWN_POINTS[] = 
     {
-        glm::vec3(-6.0f,  -0.8f,  -5.0f),
-        glm::vec3(0.0f,  -0.8f,  -6.0f),
-        glm::vec3(6.0f,  -0.8f,  -5.0f),
-        glm::vec3(-3.0f,  -0.8f,  -8.0f),
-        glm::vec3(3.0f,  -0.8f,  -8.0f),
-        glm::vec3(-10.0f, -0.8f, -12.0f),
-        glm::vec3(-5.0f,  -0.8f, -13.0f),
-        glm::vec3(0.0f,  -0.8f, -11.0f),
-        glm::vec3(5.0f,  -0.8f, -14.0f),
-        glm::vec3(10.0f, -0.8f, -12.0f),
-        glm::vec3(-13.0f, -0.8f, -20.0f),
-        glm::vec3(-8.0f,  -0.8f, -22.0f),
-        glm::vec3(-2.0f,  -0.8f, -19.0f),
-        glm::vec3(2.0f,  -0.8f, -21.0f),
-        glm::vec3(8.0f,  -0.8f, -23.0f),
-        glm::vec3(13.0f, -0.8f, -20.0f),
-        glm::vec3(-14.0f, -0.8f, -30.0f),
-        glm::vec3(-7.0f,  -0.8f, -32.0f),
-        glm::vec3(0.0f,  -0.8f, -33.0f),
-        glm::vec3(7.0f,  -0.8f, -31.0f),
-        glm::vec3(14.0f, -0.8f, -30.0f),
+        glm::vec3(-7.0f, -0.8f,  -4.0f),
+        glm::vec3(0.0f, -0.8f,  -4.0f),
+        glm::vec3(7.0f, -0.8f,  -4.0f),
+        glm::vec3(-4.0f, -0.8f,  -6.0f),
+        glm::vec3(4.0f, -0.8f,  -6.0f),
+        glm::vec3(-8.0f, -0.8f,  -7.0f),
+        glm::vec3(-3.0f, -0.8f,  -8.0f),
+        glm::vec3(0.0f, -0.8f,  -9.0f),
+        glm::vec3(3.0f, -0.8f,  -8.0f),
+        glm::vec3(8.0f, -0.8f,  -7.0f),
+        glm::vec3(-8.0f, -0.8f, -10.0f),
+        glm::vec3(-5.0f, -0.8f, -11.0f),
+        glm::vec3(0.0f, -0.8f, -12.0f),
+        glm::vec3(5.0f, -0.8f, -11.0f),
+        glm::vec3(8.0f, -0.8f, -10.0f),
+        glm::vec3(-8.0f, -0.8f, -12.0f),
+        glm::vec3(-4.0f, -0.8f, -12.0f),
+        glm::vec3(0.0f, -0.8f, -12.0f),
+        glm::vec3(4.0f, -0.8f, -12.0f),
+        glm::vec3(8.0f, -0.8f, -12.0f),
+        glm::vec3(0.0f, -0.8f,  6.0f),
     };
 
     const short NUM_SPAWN_POINTS = 21;
@@ -121,10 +121,15 @@ void MainScene::OnEnter()
         AddGameObject(obj);
     }
 
+    const float FLOOR_Y = -1.2f;
+    const float FLOOR_Z = -3.0f;
+    const float FLOOR_SIZE_XZ = 20.0f;
+    const float FLOOR_THICKNESS = 0.1f;
+
     //Suelo
     Cube* suelo = new Cube(
-        glm::vec3(0.0f, -1.5f, -3.0f),
-        glm::vec3(20.0f, 0.1f, 20.0f)
+        glm::vec3(0.0f, FLOOR_Y, FLOOR_Z),
+        glm::vec3(FLOOR_SIZE_XZ, FLOOR_THICKNESS, FLOOR_SIZE_XZ)
     );
     AddGameObject(suelo);
 
