@@ -2,7 +2,7 @@
 
 Light::Light() : GameObject()
 {
-    // Las luces no necesitan MeshRenderer
+    //Las luces no necesitan MeshRenderer
     delete meshRenderer;
     meshRenderer = nullptr;
 }

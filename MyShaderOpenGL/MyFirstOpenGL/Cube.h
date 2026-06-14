@@ -10,7 +10,7 @@ public:
     void Update(float dt) override;
     void Render(const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix, const LightData& lights) override;
 
-    glm::vec3 baseColor = glm::vec3(0.35f, 0.6f, 0.25f); //verde
+    glm::vec3 baseColor = glm::vec3(0.35f, 0.6f, 0.25f);//Verde
 
 private:
     GLuint shaderProgram = 0;

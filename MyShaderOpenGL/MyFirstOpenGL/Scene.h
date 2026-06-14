@@ -8,7 +8,6 @@
 #include "InputManager.h"
 #include "LightData.h"
 #include "DirectionalLight.h"
-#include "SpotLight.h"
 
 class Scene {
 protected:
@@ -16,8 +15,8 @@ protected:
 	Camera* camera = nullptr;
 
 	// Luz ambiente
-	glm::vec3 ambientColor     = glm::vec3(0.9f, 0.85f, 0.6f);
-	float     ambientIntensity = 0.35f;
+	glm::vec3 ambientColor = glm::vec3(0.9f, 0.85f, 0.6f);
+	float ambientIntensity = 0.35f;
 
 	std::vector<GameObject*> objects;
 

@@ -22,7 +22,7 @@ public:
 private:
 	Model* model = nullptr;
 	GLuint textureID = 0;
-	glm::vec4 tintColor = glm::vec4(1.0f); //Blanco by default
+	glm::vec4 tintColor = glm::vec4(1.0f);//Blanco by default
 	bool isUnlit = false;
 	GLuint shaderProgram = 0;
 };
