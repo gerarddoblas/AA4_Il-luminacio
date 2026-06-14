@@ -22,6 +22,8 @@ public:
 	void SetTag(std::string newTag);
 	virtual void Update(float dt) = 0;
 
+	virtual glm::vec3 GetForward() const;
+
 	virtual void Render(const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix, const LightData& lights);
 
 	Transform* GetTransform() const { return transform; }

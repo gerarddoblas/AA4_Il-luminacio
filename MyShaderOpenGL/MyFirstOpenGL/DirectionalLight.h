@@ -7,7 +7,4 @@ public:
     DirectionalLight();
 
     void Update(float dt) override {}
-
-    //direccion forward 
-    glm::vec3 GetDirection() const;
 };

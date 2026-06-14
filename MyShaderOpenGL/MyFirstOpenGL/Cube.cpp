@@ -6,7 +6,7 @@
 Cube::Cube(glm::vec3 position, glm::vec3 scale)
 {
     RenderManager::ShaderProgram shaders;
-    shaders.vertexShader   = RM->LoadVertexShader("PrimitiveVertexShader.glsl");
+    shaders.vertexShader = RM->LoadVertexShader("PrimitiveVertexShader.glsl");
     shaders.fragmentShader = RM->LoadFragmentShader("PrimitiveFragmentShader.glsl");
     shaderProgram = RM->CreateProgram(shaders);
 
@@ -75,7 +75,7 @@ Cube::Cube(glm::vec3 position, glm::vec3 scale)
 
     transform->position = position;
     transform->rotation = glm::vec3(0.0f);
-    transform->scale    = scale;
+    transform->scale = scale;
 }
 
 void Cube::Update(float dt) {}
@@ -89,26 +89,27 @@ void Cube::Render(const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix
     glm::mat4 S = transform->GetScaleMatrix();
 
     glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "translationMatrix"), 1, GL_FALSE, glm::value_ptr(T));
-    glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "rotationMatrix"),    1, GL_FALSE, glm::value_ptr(R));
-    glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "scaleMatrix"),       1, GL_FALSE, glm::value_ptr(S));
-    glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "viewMatrix"),        1, GL_FALSE, glm::value_ptr(viewMatrix));
-    glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "projectionMatrix"),  1, GL_FALSE, glm::value_ptr(projectionMatrix));
+    glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "rotationMatrix"), 1, GL_FALSE, glm::value_ptr(R));
+    glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "scaleMatrix"), 1, GL_FALSE, glm::value_ptr(S));
+    glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "viewMatrix"), 1, GL_FALSE, glm::value_ptr(viewMatrix));
+    glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "projectionMatrix"), 1, GL_FALSE, glm::value_ptr(projectionMatrix));
 
     glUniform3fv(glGetUniformLocation(shaderProgram, "baseColor"), 1, glm::value_ptr(baseColor));
 
     // Ambiente
-    glUniform3fv(glGetUniformLocation(shaderProgram, "ambientColor"),     1, glm::value_ptr(lights.ambientColor));
-    glUniform1f (glGetUniformLocation(shaderProgram, "ambientIntensity"),    lights.ambientIntensity);
+    glUniform3fv(glGetUniformLocation(shaderProgram, "ambientColor"), 1, glm::value_ptr(lights.ambientColor));
+    glUniform1f (glGetUniformLocation(shaderProgram, "ambientIntensity"), lights.ambientIntensity);
     // Sol
-    glUniform3fv(glGetUniformLocation(shaderProgram, "sunDirection"),  1, glm::value_ptr(lights.sunDirection));
-    glUniform3fv(glGetUniformLocation(shaderProgram, "sunColor"),      1, glm::value_ptr(lights.sunColor));
-    glUniform1f (glGetUniformLocation(shaderProgram, "sunIntensity"),     lights.sunIntensity);
-    glUniform1f (glGetUniformLocation(shaderProgram, "sunActive"),        lights.sunActive);
+    glUniform3fv(glGetUniformLocation(shaderProgram, "sunDirection"), 1, glm::value_ptr(lights.sunDirection));
+    glUniform3fv(glGetUniformLocation(shaderProgram, "sunColor"), 1, glm::value_ptr(lights.sunColor));
+    glUniform1f(glGetUniformLocation(shaderProgram, "sunIntensity"), lights.sunIntensity);
+    glUniform1f(glGetUniformLocation(shaderProgram, "sunActive"), lights.sunActive);
     // Luna
     glUniform3fv(glGetUniformLocation(shaderProgram, "moonDirection"), 1, glm::value_ptr(lights.moonDirection));
-    glUniform3fv(glGetUniformLocation(shaderProgram, "moonColor"),     1, glm::value_ptr(lights.moonColor));
-    glUniform1f (glGetUniformLocation(shaderProgram, "moonIntensity"),    lights.moonIntensity);
-    glUniform1f (glGetUniformLocation(shaderProgram, "moonActive"),       lights.moonActive);
+    glUniform3fv(glGetUniformLocation(shaderProgram, "moonColor"), 1, glm::value_ptr(lights.moonColor));
+    glUniform1f(glGetUniformLocation(shaderProgram, "moonIntensity"), lights.moonIntensity);
+    glUniform1f(glGetUniformLocation(shaderProgram, "moonActive"), lights.moonActive);
+
 glBindVertexArray(vao);
     glDrawArrays(GL_TRIANGLES, 0, vertexCount);
     glBindVertexArray(0);
