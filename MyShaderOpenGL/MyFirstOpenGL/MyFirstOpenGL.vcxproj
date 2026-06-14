@@ -34,7 +34,7 @@
     <ClCompile Include="RenderManager.cpp" />
     <ClCompile Include="Scene.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="SpotLight.cpp" />
+    <ClCompile Include="FlashLight.cpp" />
     <ClCompile Include="Stb.cpp" />
     <ClCompile Include="TimeManager.cpp" />
     <ClCompile Include="Transform.cpp" />
@@ -64,6 +64,7 @@
     <ClInclude Include="InputManager.h" />
     <ClInclude Include="Scene.h" />
     <ClInclude Include="SceneManager.h" />
+    <ClInclude Include="FlashLight.h" />
     <ClInclude Include="TimeManager.h" />
     <ClInclude Include="Transform.h" />
     <ClInclude Include="RenderManager.h" />

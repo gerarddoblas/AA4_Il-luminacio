@@ -8,19 +8,19 @@ uniform mat4 modelMatrix;
 uniform mat4 viewMatrix;
 uniform mat4 projectionMatrix;
 
-out vec2  TexCoord;
-out vec3  FragNormal;
-out vec3  FragPos;
+out vec2 TexCoord;
+out vec3 FragNormal;
+out vec3 FragPos;
 
 void main()
 {
     vec4 worldPos = modelMatrix * vec4(inPosition, 1.0);
-    FragPos  = worldPos.xyz;
+    FragPos = worldPos.xyz;
 
     
     mat3 normalMatrix = transpose(inverse(mat3(modelMatrix)));
     FragNormal = normalize(normalMatrix * inNormal);
 
-    TexCoord    = vec2(inTexCoord.x, 1.0 - inTexCoord.y);
+    TexCoord = vec2(inTexCoord.x, 1.0 - inTexCoord.y);
     gl_Position = projectionMatrix * viewMatrix * worldPos;
 }

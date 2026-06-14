@@ -3,12 +3,12 @@
 
 ModelObject::ModelObject(const std::string& modelPath, const std::string& texturePath)
 {
-	// Cargamos modelo
+	//Cargamos modelo
 	Model modelParaCargarOBJ = LoadOBJModel(modelPath);
 	//Lo pongo asi porque es un puntero model
 	model = new Model(modelParaCargarOBJ); 
 
-	// Cargamos la textura con stb image
+	//Cargamos la textura con stb image
 	int width, height, nrChannels;
 	unsigned char* data = stbi_load(texturePath.c_str(), &width, &height, &nrChannels, 0);
 	if (data)
@@ -58,48 +58,46 @@ void ModelObject::Render(const glm::mat4& viewMatrix, const glm::mat4& projectio
 
 	glUseProgram(shaderProgram);
 
-	// Transform
+	//Transform
 	glm::mat4 modelMat = transform->GetModelMatrix();
 	glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "modelMatrix"),1, GL_FALSE, glm::value_ptr(modelMat));
 	glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "viewMatrix"), 1, GL_FALSE, glm::value_ptr(viewMatrix));
 	glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "projectionMatrix"), 1, GL_FALSE, glm::value_ptr(projectionMatrix));
 
-	// Tint del Color
+	//Tint del Color
 	glUniform4fv(glGetUniformLocation(shaderProgram, "tintColor"), 1, glm::value_ptr(tintColor));
 
-	// Unlit flag
+	//Unlit flag
 	glUniform1i(glGetUniformLocation(shaderProgram, "isUnlit"), isUnlit ? 1 : 0);
 
-	// Texture
+	//Texture
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, textureID);
 	glUniform1i(glGetUniformLocation(shaderProgram, "textureSampler"), 0);
 
-	// Ambiente
+	//Ambiente
 	glUniform3fv(glGetUniformLocation(shaderProgram, "ambientColor"), 1, glm::value_ptr(lights.ambientColor));
 	glUniform1f (glGetUniformLocation(shaderProgram, "ambientIntensity"), lights.ambientIntensity);
 
-	// Sol
+	//Sol
 	glUniform3fv(glGetUniformLocation(shaderProgram, "sunDirection"), 1, glm::value_ptr(lights.sunDirection));
 	glUniform3fv(glGetUniformLocation(shaderProgram, "sunColor"),  1, glm::value_ptr(lights.sunColor));
 	glUniform1f (glGetUniformLocation(shaderProgram, "sunIntensity"), lights.sunIntensity);
 	glUniform1f (glGetUniformLocation(shaderProgram, "sunActive"), lights.sunActive);
 
-	// Luna
+	//Luna
 	glUniform3fv(glGetUniformLocation(shaderProgram, "moonDirection"),1, glm::value_ptr(lights.moonDirection));
 	glUniform3fv(glGetUniformLocation(shaderProgram, "moonColor"), 1, glm::value_ptr(lights.moonColor));
 	glUniform1f (glGetUniformLocation(shaderProgram, "moonIntensity"),lights.moonIntensity);
 	glUniform1f (glGetUniformLocation(shaderProgram, "moonActive"), lights.moonActive);
 
-	//SpotLigth
-	glUniform3fv(glGetUniformLocation(shaderProgram, "spotPosition"), 1, glm::value_ptr(lights.spotPosition));
-	glUniform3fv(glGetUniformLocation(shaderProgram, "spotDirection"), 1, glm::value_ptr(lights.spotDirection));
-	glUniform3fv(glGetUniformLocation(shaderProgram, "spotColor"), 1, glm::value_ptr(lights.spotColor));
-	glUniform1f(glGetUniformLocation(shaderProgram, "spotIntensity"), lights.spotIntensity);
-	glUniform1f(glGetUniformLocation(shaderProgram, "spotInnerCos"), lights.spotInnerCos);
-	glUniform1f(glGetUniformLocation(shaderProgram, "spotOuterCos"), lights.spotOuterCos);
-	glUniform1f(glGetUniformLocation(shaderProgram, "spotRange"), lights.spotRange);
-	glUniform1i(glGetUniformLocation(shaderProgram, "spotEnabled"), lights.spotEnabled);
+	//FlashLigth
+	glUniform3fv(glGetUniformLocation(shaderProgram, "flashLightPosition"), 1, glm::value_ptr(lights.flashLightPosition));
+	glUniform3fv(glGetUniformLocation(shaderProgram, "flashLightForward"), 1, glm::value_ptr(lights.flashLightForward));
+	glUniform1f(glGetUniformLocation(shaderProgram, "flashLightInnerCos"), lights.flashLightInnerCos);
+	glUniform1f(glGetUniformLocation(shaderProgram, "flashLigthExterCos"), lights.flashLigthExterCos);
+	glUniform1f(glGetUniformLocation(shaderProgram, "flashLightRange"), lights.flashLightRange);
+	glUniform1i(glGetUniformLocation(shaderProgram, "flashLightEnabled"), lights.flashLightEnabled);
 // Renderizo modelo
 	model->Render();
 
