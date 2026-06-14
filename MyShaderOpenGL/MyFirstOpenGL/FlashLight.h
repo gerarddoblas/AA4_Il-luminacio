@@ -4,8 +4,8 @@
 class FlashLight : public Light
 {
 public:
-    const float innerCutoffDeg = 14.0f; //interior 
-    const float exterCutoffDeg = 23.0f; //exterior
+    float inCircleAngle = 10.0f; //interior
+    float outCircleAngle = 15.0f; //exterior
     const float range = 15.0f;
     bool enabled = false;
 
@@ -13,6 +13,6 @@ public:
 
     void Update(float dt) override;
 
-    float GetInnerCos() const;
-    float GetExterCos() const;
+    float GetInCircle() const;
+    float GetOutCircle() const;
 };

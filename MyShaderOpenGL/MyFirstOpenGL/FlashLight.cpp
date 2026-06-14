@@ -9,6 +9,5 @@ void FlashLight::Update(float dt)
         enabled = !enabled;
 }
 
-
-float FlashLight::GetInnerCos() const { return cos(glm::radians(innerCutoffDeg)); }
-float FlashLight::GetExterCos() const { return cos(glm::radians(exterCutoffDeg)); }
+float FlashLight::GetInCircle() const { return cos(glm::radians(inCircleAngle)); }
+float FlashLight::GetOutCircle() const { return cos(glm::radians(outCircleAngle)); }

@@ -16,7 +16,6 @@ void MainScene::OnEnter()
 
     //Visual Sun
     sunVisual = new ModelObject("../Assets/Modelos/Sun.obj", "../Assets/Texturas/Sun.png");
-    sunVisual->SetUnlit(true);//Para que brille sin ser afectado por la luz
     //model del sol es enorme lo bajo la escala para poder verlo
     sunVisual->GetTransform()->scale = glm::vec3(0.00025f);
     AddGameObject(sunVisual);
@@ -30,7 +29,6 @@ void MainScene::OnEnter()
 
     //MoonVisual
     moonVisual = new ModelObject("../Assets/Modelos/Moon.obj", "../Assets/Texturas/Moon.png");
-    moonVisual->SetUnlit(true);
     moonVisual->GetTransform()->scale = glm::vec3(3.0f);
     AddGameObject(moonVisual);
 

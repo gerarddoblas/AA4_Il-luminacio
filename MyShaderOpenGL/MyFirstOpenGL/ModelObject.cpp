@@ -1,4 +1,4 @@
-﻿#include "ModelObject.h"
+#include "ModelObject.h"
 
 
 ModelObject::ModelObject(const std::string& modelPath, const std::string& texturePath)
@@ -67,9 +67,6 @@ void ModelObject::Render(const glm::mat4& viewMatrix, const glm::mat4& projectio
 	//Tint del Color
 	glUniform4fv(glGetUniformLocation(shaderProgram, "tintColor"), 1, glm::value_ptr(tintColor));
 
-	//Unlit flag
-	glUniform1i(glGetUniformLocation(shaderProgram, "isUnlit"), isUnlit ? 1 : 0);
-
 	//Texture
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, textureID);
@@ -94,8 +91,8 @@ void ModelObject::Render(const glm::mat4& viewMatrix, const glm::mat4& projectio
 	//FlashLigth
 	glUniform3fv(glGetUniformLocation(shaderProgram, "flashLightPosition"), 1, glm::value_ptr(lights.flashLightPosition));
 	glUniform3fv(glGetUniformLocation(shaderProgram, "flashLightForward"), 1, glm::value_ptr(lights.flashLightForward));
-	glUniform1f(glGetUniformLocation(shaderProgram, "flashLightInnerCos"), lights.flashLightInnerCos);
-	glUniform1f(glGetUniformLocation(shaderProgram, "flashLigthExterCos"), lights.flashLigthExterCos);
+	glUniform1f(glGetUniformLocation(shaderProgram, "flashLightInCircle"), lights.flashLightInCircle);
+	glUniform1f(glGetUniformLocation(shaderProgram, "flashLightOutCircle"), lights.flashLightOutCircle);
 	glUniform1f(glGetUniformLocation(shaderProgram, "flashLightRange"), lights.flashLightRange);
 	glUniform1i(glGetUniformLocation(shaderProgram, "flashLightEnabled"), lights.flashLightEnabled);
 // Renderizo modelo

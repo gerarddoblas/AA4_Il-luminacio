@@ -23,8 +23,8 @@ struct LightData
     //FlashLigth
     glm::vec3 flashLightPosition = glm::vec3(0.0f);
     glm::vec3 flashLightForward = glm::vec3(0.0f, 0.0f, -1.0f);
-    float flashLightInnerCos = 0.97f;
-    float flashLigthExterCos = 0.92f;
+    float flashLightInCircle = 0.97f;
+    float flashLightOutCircle = 0.92f;
     float flashLightRange = 15.0f;
     float flashLightEnabled = 0.0f;
 };

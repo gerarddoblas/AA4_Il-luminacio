@@ -71,8 +71,8 @@ void Scene::Render()
 	{
 		lights.flashLightPosition = sl->GetTransform()->position;
 		lights.flashLightForward = sl->GetForward();
-		lights.flashLightInnerCos = sl->GetInnerCos();
-		lights.flashLigthExterCos = sl->GetExterCos();
+		lights.flashLightInCircle = sl->GetInCircle();
+		lights.flashLightOutCircle = sl->GetOutCircle();
 		lights.flashLightRange = sl->range;
 		lights.flashLightEnabled = sl->enabled ? 1 : 0;
 	}

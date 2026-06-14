@@ -25,8 +25,8 @@ uniform float moonActive;
 //Linterna
 uniform vec3 flashLightPosition;
 uniform vec3 flashLightForward;
-uniform float flashLightInnerCos;
-uniform float flashLigthExterCos;
+uniform float flashLightInCircle;
+uniform float flashLightOutCircle;
 uniform float flashLightRange;
 uniform int flashLightEnabled;
 
@@ -49,15 +49,22 @@ vec3 CalcFlashLight()
     vec3 fragDir = normalize(toFrag);
     float cosA = dot(fragDir, normalize(flashLightForward));
 
-    if (cosA < flashLigthExterCos) return vec3(0.0);
-
-    float epsilon = flashLightInnerCos - flashLigthExterCos;
-    float cone = clamp((cosA - flashLigthExterCos) / epsilon, 0.0, 1.0);
-    float atten = 1.0 - clamp(dist / flashLightRange, 0.0, 1.0);
-    atten = atten * atten;
+    float intensity = 0.0;
+    if (cosA > flashLightInCircle)
+    {
+        intensity = 1.0;
+    }
+    else if (cosA > flashLightOutCircle)
+    {
+        intensity = 0.5;
+    }
+    else
+    {
+        return vec3(0.0);
+    }
 
     float diff = max(dot(FragNormal, -fragDir), 0.0);
-    return vec3(diff * cone * atten);
+    return vec3(diff * intensity);
 }
 
 void main()
