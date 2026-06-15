@@ -4,6 +4,17 @@
 Camera::Camera() : GameObject()
 {
     transform->position = glm::vec3(0.0f, 0.5f, 4.0f);
+    transform->rotation.x = -90.0f;
+    flashlight = new FlashLight();
+}
+
+Camera::~Camera()
+{
+    if (flashlight)
+    {
+        delete flashlight;
+        flashlight = nullptr;
+    }
 }
 
 void Camera::Update(float dt)
@@ -11,9 +22,9 @@ void Camera::Update(float dt)
     float deltaX = (float)IM->GetMouseDeltaX() * mouseSensitivity;
     float deltaY = (float)IM->GetMouseDeltaY() * mouseSensitivity;
 
-    yaw += deltaX;
-    pitch -= deltaY;
-    pitch = glm::clamp(pitch, -89.0f, 89.0f);
+    transform->rotation.x += deltaX;
+    transform->rotation.y -= deltaY;
+    transform->rotation.y = glm::clamp(transform->rotation.y, -89.0f, 89.0f);
 
     glm::vec3 forward = GetForward();
     glm::vec3 right = GetRight();
@@ -29,15 +40,13 @@ void Camera::Update(float dt)
 
     if (IM->GetKey(GLFW_KEY_A, HOLD) || IM->GetKey(GLFW_KEY_A, DOWN))
         transform->position -= right * moveSpeed * dt;
-}
 
-glm::vec3 Camera::GetForward() const
-{
-    glm::vec3 forward;
-    forward.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
-    forward.y = sin(glm::radians(pitch));
-    forward.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
-    return glm::normalize(forward);
+    if (flashlight)
+    {
+        flashlight->Update(dt);
+        flashlight->GetTransform()->position = transform->position;
+        flashlight->GetTransform()->rotation = glm::vec3(transform->rotation.x, transform->rotation.y, 0.0f);
+    }
 }
 
 glm::vec3 Camera::GetRight() const

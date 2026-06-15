@@ -1,47 +1,42 @@
 #include "MainScene.h"
 #include "Utils.h"
 #include "InputManager.h"
+#include "Spawner.h"
 
 void MainScene::OnEnter()
 {
-    // Camara
+    //Camara
     camera = new Camera();
 
-    flashlight = new SpotLight();
-    flashlight->SetTag("flashlight");
-    AddGameObject(flashlight);
-
-    // Sun
+    //Sun
     sun = new DirectionalLight();
     sun->SetTag("sun");
     sun->color = glm::vec3(1.0f, 0.95f, 0.8f);
     sun->intensity = 1.0f;
     AddGameObject(sun);
 
-    // Visual Sun
+    //Visual Sun
     sunVisual = new ModelObject("../Assets/Modelos/Sun.obj", "../Assets/Texturas/Sun.png");
-    sunVisual->SetUnlit(true); // Para que brille sin ser afectado por la luz
-    // model del sol es enorme lo bajo la escala para poder verlo
+    //model del sol es enorme lo bajo la escala para poder verlo
     sunVisual->GetTransform()->scale = glm::vec3(0.00025f);
     AddGameObject(sunVisual);
 
-    // Moon
+    //Moon
     moon = new DirectionalLight();
     moon->SetTag("moon");
     moon->color = glm::vec3(0.4f, 0.5f, 0.8f);
     moon->intensity = 0.4f;
     AddGameObject(moon);
 
-    // MoonVisual
+    //MoonVisual
     moonVisual = new ModelObject("../Assets/Modelos/Moon.obj", "../Assets/Texturas/Moon.png");
-    moonVisual->SetUnlit(true);
     moonVisual->GetTransform()->scale = glm::vec3(3.0f);
     AddGameObject(moonVisual);
 
-    // DayNightCycle
+    //DayNightCycle
     dayNightCycle = new DayNightCycle(sun, moon);
     dayNightCycle->cycleDuration = 20.0f;
-    dayNightCycle->orbitRadius = 70.0f; // Distancia a la escene
+    dayNightCycle->orbitRadius = 70.0f;//Distancia a la escene
     
     dayNightCycle->onAmbientChanged = [this](glm::vec3 color, float intensity)
     {
@@ -104,12 +99,9 @@ void MainScene::OnEnter()
 
     for (short i = 0; i < NUM_SPAWN_POINTS; i++)
     {
-        //Elegir modelo aleatorio
         short modelIndex = rand() % NUM_MODELS;
 
-        //Escala aleatoria
         float scale = RandomRange(SCALE_MIN[modelIndex], SCALE_MAX[modelIndex]);
-        //Rotacion aleatoria
         float rotY = RandomRange(ROTY_MIN, ROTY_MAX);
         float rotX = RandomRange(-ROTX_MIN, ROTX_MAX);
 
@@ -118,7 +110,8 @@ void MainScene::OnEnter()
         obj->GetTransform()->position = SPAWN_POINTS[i];
         obj->GetTransform()->scale = glm::vec3(scale);
         obj->GetTransform()->rotation = glm::vec3(rotX, rotY, 0.0f);
-        AddGameObject(obj);
+
+        SPAWNER.SpawnObject(obj);
     }
 
     const float FLOOR_Y = -1.2f;
@@ -133,7 +126,7 @@ void MainScene::OnEnter()
     );
     AddGameObject(suelo);
 
-    // Sky
+    //Sky
     glClearColor(0.4f, 0.6f, 0.9f, 1.0f);
 }
 
@@ -141,17 +134,19 @@ void MainScene::Update(float dt)
 {
     Scene::Update(dt);
 
-    // Luz y sol o luna en la misma pos
-    if (sun && sunVisual)
+    while (SPAWNER.HasPendingObjects())
     {
-        sunVisual->GetTransform()->position = sun->GetTransform()->position;
+        GameObject* obj = SPAWNER.PopObject();
+        if (obj) AddGameObject(obj);
     }
+
+    //Luz y sol o luna en la misma pos
+    if (sun && sunVisual)
+        sunVisual->GetTransform()->position = sun->GetTransform()->position;
 
     if (moon && moonVisual)
-    {
         moonVisual->GetTransform()->position = moon->GetTransform()->position;
-    }
 
-    // color del sky sigue cycle nightday
+    //Color del sky sigue cycle nightday
     glClearColor(ambientColor.r * 0.5f, ambientColor.g * 0.7f, ambientColor.b, 1.0f);
 }

@@ -1,8 +1,8 @@
 #pragma once
 #include <glm.hpp>
 #include <gtc/matrix_transform.hpp>
-#include <gtc/type_ptr.hpp>
 #include "GameObject.h"
+#include "FlashLight.h"
 
 class Camera : public GameObject {
 public:
@@ -13,19 +13,18 @@ public:
     float fnear = 0.1f;
     float fFar = 100.f;
 
-    float yaw = -90.0f;
-    float pitch = 0.0f;
-
     float mouseSensitivity = 0.1f;
     float moveSpeed = 3.0f;
 
+    FlashLight* flashlight = nullptr;
+
     Camera();
+    ~Camera();
 
     void Update(float dt) override;
 
-    glm::vec3 GetForward() const;
-    glm::vec3 GetRight()   const;
+    glm::vec3 GetRight() const;
 
-    glm::mat4 GetViewMatrix()                  const;
+    glm::mat4 GetViewMatrix() const;
     glm::mat4 GetProjectionMatrix(float aspectRatio) const;
 };

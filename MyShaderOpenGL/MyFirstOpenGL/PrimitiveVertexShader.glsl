@@ -14,7 +14,7 @@ out vec3 FragPos;
 
 void main()
 {
-    mat4 model   = translationMatrix * rotationMatrix * scaleMatrix;
+    mat4 model = translationMatrix * rotationMatrix * scaleMatrix;
     vec4 worldPos = model * vec4(posicion, 1.0);
 
     FragPos = worldPos.xyz;
