@@ -1,6 +1,7 @@
 #include "MainScene.h"
 #include "Utils.h"
 #include "InputManager.h"
+#include "Spawner.h"
 
 void MainScene::OnEnter()
 {
@@ -98,12 +99,9 @@ void MainScene::OnEnter()
 
     for (short i = 0; i < NUM_SPAWN_POINTS; i++)
     {
-        //Elegir modelo aleatorio
         short modelIndex = rand() % NUM_MODELS;
 
-        //Escala aleatoria
         float scale = RandomRange(SCALE_MIN[modelIndex], SCALE_MAX[modelIndex]);
-        //Rotacion aleatoria
         float rotY = RandomRange(ROTY_MIN, ROTY_MAX);
         float rotX = RandomRange(-ROTX_MIN, ROTX_MAX);
 
@@ -112,7 +110,8 @@ void MainScene::OnEnter()
         obj->GetTransform()->position = SPAWN_POINTS[i];
         obj->GetTransform()->scale = glm::vec3(scale);
         obj->GetTransform()->rotation = glm::vec3(rotX, rotY, 0.0f);
-        AddGameObject(obj);
+
+        SPAWNER.SpawnObject(obj);   // <- único cambio
     }
 
     const float FLOOR_Y = -1.2f;
@@ -134,6 +133,12 @@ void MainScene::OnEnter()
 void MainScene::Update(float dt)
 {
     Scene::Update(dt);
+
+    while (SPAWNER.HasPendingObjects())
+    {
+        GameObject* obj = SPAWNER.PopObject();
+        if (obj) AddGameObject(obj);
+    }
 
     //Luz y sol o luna en la misma pos
     if (sun && sunVisual)

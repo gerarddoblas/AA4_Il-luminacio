@@ -65,6 +65,7 @@
     <ClInclude Include="Scene.h" />
     <ClInclude Include="SceneManager.h" />
     <ClInclude Include="FlashLight.h" />
+    <ClInclude Include="Spawner.h" />
     <ClInclude Include="TimeManager.h" />
     <ClInclude Include="Transform.h" />
     <ClInclude Include="RenderManager.h" />
