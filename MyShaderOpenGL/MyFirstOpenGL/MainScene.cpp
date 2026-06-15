@@ -111,7 +111,7 @@ void MainScene::OnEnter()
         obj->GetTransform()->scale = glm::vec3(scale);
         obj->GetTransform()->rotation = glm::vec3(rotX, rotY, 0.0f);
 
-        SPAWNER.SpawnObject(obj);   // <- único cambio
+        SPAWNER.SpawnObject(obj);
     }
 
     const float FLOOR_Y = -1.2f;

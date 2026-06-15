@@ -35,6 +35,7 @@
     <ClCompile Include="Scene.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="FlashLight.cpp" />
+    <ClCompile Include="Spawner.cpp" />
     <ClCompile Include="Stb.cpp" />
     <ClCompile Include="TimeManager.cpp" />
     <ClCompile Include="Transform.cpp" />
