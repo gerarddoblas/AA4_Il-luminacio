@@ -11,7 +11,7 @@ class DayNightCycle : public GameObject
 {
 public:
     float cycleDuration = 20.0f;//Segundos por ciclo completo
-    float orbitRadius   = 8.0f;
+    float orbitRadius = 8.0f;
 
     //Callback que la escena puede usar para recibir el ambient calculado
     std::function<void(glm::vec3 color, float intensity)> onAmbientChanged;
@@ -19,7 +19,7 @@ public:
     DayNightCycle(DirectionalLight* sun, DirectionalLight* moon);
 
     void Update(float dt) override;
-    void Render(const glm::mat4& view, const glm::mat4& proj, const LightData& lights) override {}
+    void Render(const glm::mat4& view, const glm::mat4& proj) override {}
 
     float GetAngleDeg() const { return angleDeg; }
 

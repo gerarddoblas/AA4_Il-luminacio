@@ -15,7 +15,7 @@ glm::vec3 GameObject::GetForward() const
     return glm::normalize(forward);
 }
 
-void GameObject::Render(const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix, const LightData& lights) {}
+void GameObject::Render(const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix) {}
 
 GameObject::~GameObject()
 {

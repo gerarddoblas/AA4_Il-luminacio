@@ -15,4 +15,5 @@ public:
 
     float GetInCircle() const;
     float GetOutCircle() const;
+    inline glm::vec3 GetPosition() { return transform->position; }
 };

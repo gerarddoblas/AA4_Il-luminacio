@@ -10,17 +10,12 @@ uniform vec3 baseColor;
 uniform vec3 ambientColor;
 uniform float ambientIntensity;
 
-//Sol
-uniform vec3 sunDirection;
-uniform vec3 sunColor;
-uniform float sunIntensity;
-uniform float sunActive;
-
-//Luna
-uniform vec3 moonDirection;
-uniform vec3 moonColor;
-uniform float moonIntensity;
-uniform float moonActive;
+#define MAX_DIRECTIONALS 2
+uniform int totalDirectionals;
+uniform vec3 lightDirection[MAX_DIRECTIONALS];
+uniform vec3 lightColor[MAX_DIRECTIONALS];
+uniform float lightIntensity[MAX_DIRECTIONALS];
+uniform float lightIsVisible[MAX_DIRECTIONALS];
 
 //Linterna
 uniform vec3 flashLightPosition;
@@ -70,10 +65,19 @@ vec3 CalcFlashLight()
 void main()
 {
     vec3 ambient = ambientColor * ambientIntensity;
-    vec3 sun = CalcDirectional(sunDirection,  sunColor,  sunIntensity,  sunActive);
-    vec3 moon = CalcDirectional(moonDirection, moonColor, moonIntensity, moonActive);
+
+    vec3 directionalLights = vec3(0.0);
+    for(int i = 0; i < totalDirectionals; i++)
+    {
+        if(lightIsVisible[i] > 0.0)
+        {
+            float amountLight = max(dot(FragNormal, normalize(lightDirection[i] * -1.0)), 0.0);
+            directionalLights += lightColor[i] * lightIntensity[i] * amountLight;
+        }
+    }
+
     vec3 spot = CalcFlashLight();
 
-    vec3 lighting = ambient + sun + moon;
+    vec3 lighting = ambient + directionalLights + spot;
     fragColor = vec4(baseColor * lighting, 1.0);
 }

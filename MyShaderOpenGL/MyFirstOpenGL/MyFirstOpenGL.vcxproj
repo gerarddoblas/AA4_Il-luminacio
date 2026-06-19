@@ -20,6 +20,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="LightManager.cpp" />
     <ClCompile Include="MainScene.cpp" />
     <ClCompile Include="ModelObject.cpp" />
     <ClCompile Include="Light.cpp" />
@@ -51,6 +52,7 @@
     <None Include="TextureVertexShader.glsl" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="LightManager.h" />
     <ClInclude Include="MainScene.h" />
     <ClInclude Include="ModelObject.h" />
     <ClInclude Include="LightData.h" />

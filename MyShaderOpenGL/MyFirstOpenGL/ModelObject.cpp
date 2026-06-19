@@ -52,7 +52,7 @@ ModelObject::~ModelObject()
 
 void ModelObject::Update(float dt) {}
 
-void ModelObject::Render(const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix, const LightData& lights)
+void ModelObject::Render(const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix)
 {
 	if (!isVisible) return;
 
@@ -72,29 +72,9 @@ void ModelObject::Render(const glm::mat4& viewMatrix, const glm::mat4& projectio
 	glBindTexture(GL_TEXTURE_2D, textureID);
 	glUniform1i(glGetUniformLocation(shaderProgram, "textureSampler"), 0);
 
-	//Ambiente
-	glUniform3fv(glGetUniformLocation(shaderProgram, "ambientColor"), 1, glm::value_ptr(lights.ambientColor));
-	glUniform1f (glGetUniformLocation(shaderProgram, "ambientIntensity"), lights.ambientIntensity);
+	LM->ApplyLightsRender(shaderProgram);
 
-	//Sol
-	glUniform3fv(glGetUniformLocation(shaderProgram, "sunDirection"), 1, glm::value_ptr(lights.sunDirection));
-	glUniform3fv(glGetUniformLocation(shaderProgram, "sunColor"),  1, glm::value_ptr(lights.sunColor));
-	glUniform1f (glGetUniformLocation(shaderProgram, "sunIntensity"), lights.sunIntensity);
-	glUniform1f (glGetUniformLocation(shaderProgram, "sunActive"), lights.sunActive);
 
-	//Luna
-	glUniform3fv(glGetUniformLocation(shaderProgram, "moonDirection"),1, glm::value_ptr(lights.moonDirection));
-	glUniform3fv(glGetUniformLocation(shaderProgram, "moonColor"), 1, glm::value_ptr(lights.moonColor));
-	glUniform1f (glGetUniformLocation(shaderProgram, "moonIntensity"),lights.moonIntensity);
-	glUniform1f (glGetUniformLocation(shaderProgram, "moonActive"), lights.moonActive);
-
-	//FlashLigth
-	glUniform3fv(glGetUniformLocation(shaderProgram, "flashLightPosition"), 1, glm::value_ptr(lights.flashLightPosition));
-	glUniform3fv(glGetUniformLocation(shaderProgram, "flashLightForward"), 1, glm::value_ptr(lights.flashLightForward));
-	glUniform1f(glGetUniformLocation(shaderProgram, "flashLightInCircle"), lights.flashLightInCircle);
-	glUniform1f(glGetUniformLocation(shaderProgram, "flashLightOutCircle"), lights.flashLightOutCircle);
-	glUniform1f(glGetUniformLocation(shaderProgram, "flashLightRange"), lights.flashLightRange);
-	glUniform1i(glGetUniformLocation(shaderProgram, "flashLightEnabled"), lights.flashLightEnabled);
 // Renderizo modelo
 	model->Render();
 

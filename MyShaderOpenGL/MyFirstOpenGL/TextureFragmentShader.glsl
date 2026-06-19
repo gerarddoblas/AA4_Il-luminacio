@@ -12,17 +12,12 @@ uniform vec4 tintColor;
 uniform vec3 ambientColor;
 uniform float ambientIntensity;
 
-//Sun
-uniform vec3 sunDirection;
-uniform vec3 sunColor;
-uniform float sunIntensity;
-uniform float sunActive;
-
-//Luna
-uniform vec3 moonDirection;
-uniform vec3 moonColor;
-uniform float moonIntensity;
-uniform float moonActive;
+#define MAXIMUM_DIRECTIONALIGHTS 2
+uniform int totalDirectionals;
+uniform vec3 lightDirection[MAXIMUM_DIRECTIONALIGHTS];
+uniform vec3 lightColor[MAXIMUM_DIRECTIONALIGHTS];
+uniform float lightIntensity[MAXIMUM_DIRECTIONALIGHTS];
+uniform float lightIsVisible[MAXIMUM_DIRECTIONALIGHTS];
 
 //FlashLight
 uniform vec3 flashLightPosition;
@@ -41,18 +36,14 @@ void main()
 
     vec3 ambient = ambientColor * ambientIntensity;
 
-    vec3 sun = vec3(0.0);
-    if(sunActive > 0.0)
+    vec3 directionalLights = vec3(0.0);
+    for(int i = 0; i < totalDirectionals; i++)
     {
-        float amountLight = dot(FragNormal, normalize(sunDirection *-1));
-        sun = sunColor * sunIntensity * amountLight;
-    }
-
-    vec3 moon = vec3(0.0);
-    if(moonActive > 0.0)
-    {
-        float amountLight = dot(FragNormal, normalize(moonDirection * -1));
-        moon = moonColor * moonIntensity * amountLight;
+        if(lightIsVisible[i] > 0.0)
+        {
+            float amountLight = max(dot(FragNormal, normalize(lightDirection[i] * -1.0)), 0.0);
+            directionalLights += lightColor[i] * lightIntensity[i] * amountLight;
+        }
     }
 
     vec3 flashLight = vec3(0.0);
@@ -85,6 +76,6 @@ void main()
         }
     }
 
-    vec3 lighting = ambient + sun + moon + flashLight;
+    vec3 lighting = ambient + directionalLights + flashLight;
     fragColor = vec4(texColor.rgb * lighting, texColor.a);
 }

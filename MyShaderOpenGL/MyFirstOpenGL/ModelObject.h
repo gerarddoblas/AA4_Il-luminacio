@@ -2,6 +2,7 @@
 #include "GameObject.h"
 #include "Model.h"
 #include "RenderManager.h"
+#include "LightManager.h"
 #include <stb_image.h>
 #include <gtc/type_ptr.hpp>
 #include <iostream>
@@ -14,7 +15,7 @@ public:
 	~ModelObject() override;
 
 	void Update(float dt) override;
-	void Render(const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix, const LightData& lights) override;
+	void Render(const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix) override;
 
 	void SetTintColor(const glm::vec4& color) { tintColor = color; }
 

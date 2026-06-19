@@ -79,7 +79,7 @@ void Scene::Render()
 
 	for (GameObject* o : objects) {
 		if (o != nullptr && o->isVisible) {
-			o->Render(viewMatrix, projectionMatrix, lights);
+			o->Render(viewMatrix, projectionMatrix);
 		}
 	}
 }
