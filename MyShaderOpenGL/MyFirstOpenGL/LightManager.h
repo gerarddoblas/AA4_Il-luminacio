@@ -25,6 +25,7 @@ public:
     void AddDirectionalLight(DirectionalLight* dl);
     void AddFlashLight(FlashLight* fl);
     void ApplyLightsRender(GLuint shaderToPass);
+    void SetAmbient(glm::vec3 colorLight, float intensityAmbien);
 
 private:
     float ambientIntensity = 0.3f;

@@ -155,36 +155,35 @@ void MainScene::UpdateDayNight(float dt)
     OrbitAroundWorld(moon, timeWithDegrees + 180.0f);
 
     // angulo 90 = sol
-    float t = sin(glm::radians(timeWithDegrees));
-    glm::vec3 colorNoche = glm::vec3(0.05f, 0.05f, 0.15f); // Azul oscuro apagado
-    glm::vec3 colorTransicion = glm::vec3(0.60f, 0.30f, 0.20f); // Naranja/Rojizo para amanecer/atardecer
-    glm::vec3 colorDia = glm::vec3(0.90f, 0.85f, 0.60f); // Amarillo cálido brillante
+    float timeOfDay = sin(glm::radians(timeWithDegrees));
+    glm::vec3 colorNight = glm::vec3(0.05f, 0.05f, 0.15f); // Azul oscuro apagado
+    glm::vec3 colorEvening = glm::vec3(0.60f, 0.30f, 0.20f); // Naranja/Rojizo para amanecer/atardecer
+    glm::vec3 colorDay = glm::vec3(0.90f, 0.85f, 0.60f); // Amarillo cálido brillante
 
-    float ambientIntensity;
+    float ambientIntensityNight = 0.2;
+    float ambientIntensityEvening = 0.5;
+    float ambientIntensityNoon = 1.0f;
 
-    if (t < -0.5f)
+    if (timeOfDay < -0.5f)
     {
-        // Noche azul
-        ambientColor = colorNoche;
-        ambientIntensity = 0.2f;
+        LM->SetAmbient(colorNight, ambientIntensityNight);
+      
     }
-    else if (t < 0.2f)
+    else if (timeOfDay < 0.2f)
     {
+        LM->SetAmbient(colorEvening, ambientIntensityEvening);
         // Amanecer / Atardecer naranja
-        ambientColor = colorTransicion;
-        ambientIntensity = 0.5f;
     }
-    else if (t < 0.7f)
+    else if (timeOfDay < 0.7f)
     {
+        LM->SetAmbient(colorDay, ambientIntensityNoon * 0.8f);
         // Dia amarillo menos intensity
-        ambientColor = colorDia * 0.8f;
-        ambientIntensity = 0.8f;
+
     }
     else
     {
         // Mediodia amarillo mas intensity
-        ambientColor = colorDia;
-        ambientIntensity = 1.0f;
+        LM->SetAmbient(colorDay, ambientIntensityNoon);
     }
 
 }
@@ -209,4 +208,7 @@ void MainScene::OrbitAroundWorld(DirectionalLight* light, float deg)
     //Solo ilumina si Y positiva
     float sunHeight = pos.y;
     light->isVisible = (sunHeight > 0.0f);
+
+
+
 }

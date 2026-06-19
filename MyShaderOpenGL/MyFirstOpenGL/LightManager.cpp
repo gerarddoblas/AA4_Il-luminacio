@@ -15,7 +15,7 @@ void LightManager::ApplyLightsRender(GLuint shaderToPass)
 	short totalLights = directionals.size();
 	glUniform1i(glGetUniformLocation(shaderToPass, "totalDirectionals"), totalLights);
 
-	//AMBIENT LIGHT TO SEND TODO:
+	//ambient light
 	glUniform3fv(glGetUniformLocation(shaderToPass, "ambientColor"), 1, glm::value_ptr(ambientColor));
 	glUniform1f(glGetUniformLocation(shaderToPass, "ambientIntensity"), ambientIntensity);
 
@@ -30,11 +30,12 @@ void LightManager::ApplyLightsRender(GLuint shaderToPass)
 
 		DirectionalLight* lightToSendToShader = directionals[i];
 
+		glUniform1f(glGetUniformLocation(shaderToPass, lightVisibleName.c_str()), lightToSendToShader->isVisible ? 1.0f : 0.0f);
+
 		if (lightToSendToShader->isVisible)
 		{
 			glUniform3fv(glGetUniformLocation(shaderToPass, lightDirectionName.c_str()), 1, glm::value_ptr(lightToSendToShader->GetForward()));
 			glUniform1f(glGetUniformLocation(shaderToPass, lightIntensityName.c_str()), lightToSendToShader->intensity);
-			glUniform1f(glGetUniformLocation(shaderToPass, lightVisibleName.c_str()), lightToSendToShader->isVisible);
 			glUniform3fv(glGetUniformLocation(shaderToPass, lightColorName.c_str()), 1, glm::value_ptr(lightToSendToShader->color));
 		}
 	
@@ -52,4 +53,10 @@ void LightManager::ApplyLightsRender(GLuint shaderToPass)
 		glUniform1f(glGetUniformLocation(shaderToPass, "flashLightRange"), flashLightToSendToShader->range);
 		glUniform1i(glGetUniformLocation(shaderToPass, "flashLightEnabled"), flashLightToSendToShader->enabled);
 	}
+}
+
+void LightManager::SetAmbient(glm::vec3 colorLight, float intensityAmbien)
+{
+	ambientColor = colorLight;
+	ambientIntensity = intensityAmbien;
 }
