@@ -12,6 +12,7 @@ uniform vec4 tintColor;
 uniform vec3 ambientColor;
 uniform float ambientIntensity;
 
+//Directional Lights
 #define MAXIMUM_DIRECTIONALIGHTS 2
 uniform int totalDirectionals;
 uniform vec3 lightDirection[MAXIMUM_DIRECTIONALIGHTS];
@@ -20,12 +21,14 @@ uniform float lightIntensity[MAXIMUM_DIRECTIONALIGHTS];
 uniform float lightIsVisible[MAXIMUM_DIRECTIONALIGHTS];
 
 //FlashLight
-uniform vec3 flashLightPosition;
-uniform vec3 flashLightForward;
-uniform float flashLightInCircle;
-uniform float flashLightOutCircle;
-uniform float flashLightRange;
-uniform int flashLightEnabled;
+#define MAXIMUM_FLASHLIGHTS 2
+uniform int totalFlashLights;
+uniform vec3 flashLightPosition[MAXIMUM_FLASHLIGHTS];
+uniform vec3 flashLightForward[MAXIMUM_FLASHLIGHTS];
+uniform float flashLightInCircle[MAXIMUM_FLASHLIGHTS];
+uniform float flashLightOutCircle[MAXIMUM_FLASHLIGHTS];
+uniform float flashLightRange[MAXIMUM_FLASHLIGHTS];
+uniform int flashLightEnabled[MAXIMUM_FLASHLIGHTS];
 
 out vec4 fragColor;
 

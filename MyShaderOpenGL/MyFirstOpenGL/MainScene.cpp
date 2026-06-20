@@ -156,9 +156,9 @@ void MainScene::UpdateDayNight(float dt)
 
     // angulo 90 = sol
     float timeOfDay = sin(glm::radians(timeWithDegrees));
-    glm::vec3 colorNight = glm::vec3(0.05f, 0.05f, 0.15f); // Azul oscuro apagado
-    glm::vec3 colorEvening = glm::vec3(0.60f, 0.30f, 0.20f); // Naranja/Rojizo para amanecer/atardecer
-    glm::vec3 colorDay = glm::vec3(0.90f, 0.85f, 0.60f); // Amarillo cálido brillante
+    glm::vec3 colorNight = glm::vec3(0.05f, 0.05f, 0.15f); // Azul oscuro
+    glm::vec3 colorEvening = glm::vec3(0.60f, 0.30f, 0.20f); // Naranja
+    glm::vec3 colorDay = glm::vec3(0.90f, 0.85f, 0.60f); // Amarillo 
 
     float ambientIntensityNight = 0.2;
     float ambientIntensityEvening = 0.5;
