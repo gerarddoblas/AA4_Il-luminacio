@@ -56,17 +56,15 @@ void LightManager::ApplyLightsRender(GLuint shaderToPass)
 
 		FlashLight* flashLightToSendToShader = flashLight[i];
 
-		glUniform1f(glGetUniformLocation(shaderToPass, flashLightEnabledName.c_str()), flashLightToSendToShader->isVisible ? 1.0f : 0.0f);
+		glUniform1i(glGetUniformLocation(shaderToPass, flashLightEnabledName.c_str()), flashLightToSendToShader->enabled ? 1 : 0);
 
-		if (flashLightToSendToShader->isVisible)
+		if (flashLightToSendToShader->enabled)
 		{
-
 			glUniform3fv(glGetUniformLocation(shaderToPass, flashLightPositionName.c_str()), 1, glm::value_ptr(flashLightToSendToShader->GetPosition()));
 			glUniform3fv(glGetUniformLocation(shaderToPass, flashLightForwardName.c_str()), 1, glm::value_ptr(flashLightToSendToShader->GetForward()));
-			glUniform1f(glGetUniformLocation(shaderToPass, "flashLightInCircle"), flashLightToSendToShader->GetInCircle());
-			glUniform1f(glGetUniformLocation(shaderToPass, "flashLightOutCircle"), flashLightToSendToShader->GetOutCircle());
-			glUniform1f(glGetUniformLocation(shaderToPass, "flashLightRange"), flashLightToSendToShader->range);
-			glUniform1i(glGetUniformLocation(shaderToPass, "flashLightEnabled"), flashLightToSendToShader->enabled);
+			glUniform1f(glGetUniformLocation(shaderToPass, flashLightInCircleName.c_str()), flashLightToSendToShader->GetInCircle());
+			glUniform1f(glGetUniformLocation(shaderToPass, flashLightOutCircleName.c_str()), flashLightToSendToShader->GetOutCircle());
+			glUniform1f(glGetUniformLocation(shaderToPass, flashLightRangeName.c_str()), flashLightToSendToShader->range);
 		}
 		
 	}
