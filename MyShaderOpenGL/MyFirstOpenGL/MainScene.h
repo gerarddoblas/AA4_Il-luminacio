@@ -24,9 +24,9 @@ private:
 
     //Variables
     float timeDayNight = 0.f;
-    float cycleDuration = 10.0f;
+    float cycleDuration = 60.0f;
     float circleDegrees = 360.0f;
-    float orbitRadius = 8.0f;
+    float orbitRadius = 40.0f;
     float timeWithDegrees = 0.f;
 
     void UpdateDayNight(float dt);

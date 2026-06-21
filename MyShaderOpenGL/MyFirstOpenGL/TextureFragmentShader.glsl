@@ -50,34 +50,39 @@ void main()
     }
 
     vec3 flashLight = vec3(0.0);
-    if (flashLightEnabled == 1)
+    for(int i = 0; i < totalFlashLights; i++)
     {
-        vec3 directionFrag = FragPos - flashLightPosition;
-        float dist = length(directionFrag);
-
-        if (dist < flashLightRange)
+        
+        if (flashLightEnabled[i] == 1)
         {
-            vec3 normalizedFragDirection = normalize(directionFrag);
-            float centerDistance = dot(normalizedFragDirection, normalize(flashLightForward));
+            vec3 directionFrag = FragPos - flashLightPosition[i];
+            float dist = length(directionFrag);
 
-            float intensity = 0.0;
-            if (centerDistance > flashLightInCircle)
+            if (dist < flashLightRange[i])
             {
-                intensity = 1.0;
-            }
-            else if (centerDistance > flashLightOutCircle)
-            {
-                intensity = 0.5;
-            }
-            else
-            {
-                intensity = 0.0;
-            }
+                vec3 normalizedFragDirection = normalize(directionFrag);
+                float centerDistance = dot(normalizedFragDirection, normalize(flashLightForward[i]));
 
-            float amountLightImpact = dot(FragNormal, normalizedFragDirection * -1);
-            flashLight = vec3(amountLightImpact * intensity);
+                float intensity = 0.0;
+                if (centerDistance > flashLightInCircle[i])
+                {
+                    intensity = 1.0;
+                }
+                else if (centerDistance > flashLightOutCircle[i])
+                {
+                    intensity = 0.5;
+                }
+                else
+                {
+                    intensity = 0.0;
+                }
+
+                float amountLightImpact = dot(FragNormal, normalizedFragDirection * -1);
+                flashLight = vec3(amountLightImpact * intensity);
+            }
         }
     }
+  
 
     vec3 lighting = ambient + directionalLights + flashLight;
     fragColor = vec4(texColor.rgb * lighting, texColor.a);

@@ -17,8 +17,7 @@ void MainScene::OnEnter()
 
     //Visual Sun
     sunVisual = new ModelObject("../Assets/Modelos/Sun.obj", "../Assets/Texturas/Sun.png");
-    //model del sol es enorme lo bajo la escala para poder verlo
-    sunVisual->GetTransform()->scale = glm::vec3(0.00025f);
+    sunVisual->GetTransform()->scale = glm::vec3(0.0001f);
     AddGameObject(sunVisual);
 
     //Moon
@@ -30,7 +29,7 @@ void MainScene::OnEnter()
 
     //MoonVisual
     moonVisual = new ModelObject("../Assets/Modelos/Moon.obj", "../Assets/Texturas/Moon.png");
-    moonVisual->GetTransform()->scale = glm::vec3(3.0f);
+    moonVisual->GetTransform()->scale = glm::vec3(1.0f); 
     AddGameObject(moonVisual);
 
 
@@ -154,37 +153,49 @@ void MainScene::UpdateDayNight(float dt)
     OrbitAroundWorld(sun, timeWithDegrees);
     OrbitAroundWorld(moon, timeWithDegrees + 180.0f);
 
-    // angulo 90 = sol
-    float timeOfDay = sin(glm::radians(timeWithDegrees));
+    // angulo 0 = mediodia (cos = 1), 180 = medianoche (cos = -1)
+    float timeOfDay = cos(glm::radians(timeWithDegrees));
     glm::vec3 colorNight = glm::vec3(0.05f, 0.05f, 0.15f); // Azul oscuro
     glm::vec3 colorEvening = glm::vec3(0.60f, 0.30f, 0.20f); // Naranja
     glm::vec3 colorDay = glm::vec3(0.90f, 0.85f, 0.60f); // Amarillo 
 
-    float ambientIntensityNight = 0.2;
-    float ambientIntensityEvening = 0.5;
+    float ambientIntensityNight = 0.2f;
+    float ambientIntensityEvening = 0.5f;
     float ambientIntensityNoon = 1.0f;
 
-    if (timeOfDay < -0.5f)
-    {
-        LM->SetAmbient(colorNight, ambientIntensityNight);
-      
-    }
-    else if (timeOfDay < 0.2f)
-    {
-        LM->SetAmbient(colorEvening, ambientIntensityEvening);
-        // Amanecer / Atardecer naranja
-    }
-    else if (timeOfDay < 0.7f)
-    {
-        LM->SetAmbient(colorDay, ambientIntensityNoon * 0.8f);
-        // Dia amarillo menos intensity
+    float night = -0.2f;
+    float morning = 0.2f;
+    float day = 0.7f;
 
-    }
-    else
+    glm::vec3 currentAmbientColor;
+    float currentAmbientIntensity;
+
+    if (timeOfDay < night) // Noche
     {
-        // Mediodia amarillo mas intensity
-        LM->SetAmbient(colorDay, ambientIntensityNoon);
+        currentAmbientColor = colorNight;
+        currentAmbientIntensity = ambientIntensityNight;
     }
+    else if (timeOfDay < morning) // Amanecer / Atardecer naranja
+    {
+        currentAmbientColor = colorEvening;
+        currentAmbientIntensity = ambientIntensityEvening;
+    }
+    else if (timeOfDay < day) // Dia amarillo menos intensity
+    {
+        currentAmbientColor = colorDay;
+        currentAmbientIntensity = ambientIntensityNoon * 0.8f;
+    }
+    else // Mediodia amarillo mas intensity
+    {
+        currentAmbientColor = colorDay;
+        currentAmbientIntensity = ambientIntensityNoon;
+    }
+
+
+    LM->SetAmbient(currentAmbientColor, currentAmbientIntensity);
+    
+    ambientColor = currentAmbientColor;
+    ambientIntensity = currentAmbientIntensity;
 
 }
 
@@ -199,8 +210,6 @@ void MainScene::OrbitAroundWorld(DirectionalLight* light, float deg)
     //Direccion luz
     glm::vec3 dir = glm::normalize(pos) *= -1;
 
-   
-    //IA
     float pitch = glm::degrees(asin(dir.y));
     float yaw = glm::degrees(atan2(dir.z, dir.x));
     light->GetTransform()->rotation = glm::vec3(yaw, pitch, 0.0f);
