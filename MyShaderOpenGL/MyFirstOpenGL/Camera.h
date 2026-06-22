@@ -2,7 +2,7 @@
 #include <glm.hpp>
 #include <gtc/matrix_transform.hpp>
 #include "GameObject.h"
-#include "FlashLight.h"
+#include "LightManager.h"
 
 class Camera : public GameObject {
 public:

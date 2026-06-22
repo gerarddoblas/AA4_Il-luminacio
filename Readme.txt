@@ -2,743 +2,330 @@
 
 Edgar Novas, Gerard Doblas, Nil Barrero
 
+Hemos utilizado las siguientes fuentes:
+
+	LearnOpenGL:https://learnopengl.com/Lighting/Multiple-lights
+		
+		De la pagina official de OpenGL, hemos revisado el apartado de luces, en donde, se comenta el como gestionar varias luces y el como mantener una estructura para que la legibilidad de este sea limpia.
+
+	Kronnos:https://community.khronos.org/t/passing-array-of-vec3-to-fragment-shader/74450/8
+		De la siguiente pagina "Kronnos" hemos revisado el como poder pasar las variables por el for del shader, en el comentario 10.
+		Dejamos el ejemplo que da la persona que responde:
+			
+			for(int i = 0; i < 9; ++i)
+        		{
+            			std::string text{"pointPosition["};
+            			text += std::to_string(i) + "]";
+            			glUniform3f(glGetUniformLocation(floorShader.Program, text),
+                        		pointLightPositions[i].x, pointLightPositions[i].y, pointLightPositions[i].z);
+        		}
+			/*
+			your code:
+ 			for(int i = 0; i < 9; ++i)
+        		{
+            			glUniform3f(glGetUniformLocation(floorShader.Program, "pointPositions[i]"),
+                        		pointLightPositions[i].x, pointLightPositions[i].y, pointLightPositions[i].z);
+        		}
+
+			*/	
+
 Uso de la IA para:
 
 Revisión de magic numbers y optimización de código.
 
 Posiciones de los distintos elementos en el mapa y revisar código.
 
-Codigo hecho con IA:
-
-bool firstMouseRead = true;
-if(firstMouseRead)
-{
-    prevMouseX = mouseX;
-    prevMouseY = mouseY;
-    firstMouseRead = false;
-}
-
- if (IM->GetKey(GLFW_KEY_W, HOLD) || IM->GetKey(GLFW_KEY_W, DOWN))
-     transform->position += forward * moveSpeed * dt;
-...
-
-glm::vec3 Camera::GetForward() const
-{
-    glm::vec3 forward;
-    forward.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
-    forward.y = sin(glm::radians(pitch));
-    forward.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
-    return glm::normalize(forward);
-}
+Codigo hecho con IA: 
 
 PREGUNTA:
-Oye estoy haciendo una guarrada haciendo que dayNightCycle sepa sobre la escena puedes ayudarme a arreglarlo
-
-RESPUESTA: 
-Se usa esto (una función Lambda o Callback) por una regla de oro en programación de motores de videojuegos: la independencia (desacoplamiento).
-
-dayNightCycle->onAmbientChanged = [this](glm::vec3 color, float intensity)
-    {
-        ambientColor     = color;
-        ambientIntensity = intensity;
-    };
-Lo que hacemos con ese bloque de código es darle un "teléfono" al matemático. Le decimos: "No te preocupes por quién es el jefe ni cómo funciona la escena. Tú dedícate a calcular tu color y, cuando lo tengas, simplemente grítalo por este teléfono (onAmbientChanged)."
-
-Ese bloque que has pegado es la Escena diciendo: "Yo ([this]) me quedo al otro lado del teléfono escuchando. Cuando el ciclo de día y noche grite el nuevo color, yo me encargaré de actualizar mis propias variables internas (ambientColor = color;)."
-
-De esta forma, ambas clases se comunican perfectamente en cada fotograma, pero sus códigos son 100% independientes y limpios.
-
-
-
-PREGUNTA
-PUEDES Ayudarme a como hacer que den la vuelta alrededor de la escena, y que haya un amanecer, medianoche y mediodía y el color dependiendo de la hora
-
-#include "DayNightCycle.h"
-#include <gtc/matrix_transform.hpp>
-
-DayNightCycle::DayNightCycle(DirectionalLight* sun, DirectionalLight* moon)
-    : sun(sun), moon(moon)
-{
-    delete meshRenderer;
-    meshRenderer = nullptr;
-}
-
-void DayNightCycle::Update(float dt)
-{
-    
-    float degreesPerSecond = 360.0f / cycleDuration;
-    angleDeg += degreesPerSecond * dt;
-    if (angleDeg >= 360.0f) angleDeg -= 360.0f;
-
-    //180 grados entre si
-    ApplyOrbitToLight(sun,  angleDeg);
-    ApplyOrbitToLight(moon, angleDeg + 180.0f);
-
-  }
-
-void DayNightCycle::ApplyOrbitToLight(DirectionalLight* light, float deg)
-{
-    // Z fijo
-    
-    float rad = glm::radians(deg);
-    glm::vec3 pos = glm::vec3(sin(rad) * orbitRadius, cos(rad) * orbitRadius, 0.0f);
-    light->GetTransform()->position = pos;
-
-    // direccion luz
-    glm::vec3 dir = glm::normalize(-pos);
-
-       // solo ilumina si Y positiva
-    float sunHeight = pos.y;
-    light->isVisible = (sunHeight > 0.0f);
-
-
-
-
-RESPUESTA
-
-#include "DayNightCycle.h"
-#include <gtc/matrix_transform.hpp>
-#include <algorithm>
-
-DayNightCycle::DayNightCycle(DirectionalLight* sun, DirectionalLight* moon)
-    : sun(sun), moon(moon)
-{
-    delete meshRenderer;
-    meshRenderer = nullptr;
-}
-
-void DayNightCycle::Update(float dt)
-{
-    
-    float degreesPerSecond = 360.0f / cycleDuration;
-    angleDeg += degreesPerSecond * dt;
-    if (angleDeg >= 360.0f) angleDeg -= 360.0f;
-
-    //180 grados entre si
-    ApplyOrbitToLight(sun,  angleDeg);
-    ApplyOrbitToLight(moon, angleDeg + 180.0f);
-
-    // angulo 90 = sol
-    float t = sin(glm::radians(angleDeg));
-
-    // Calculamos el ambient de este momento y avisamos a quien escuche
-    if (onAmbientChanged)
-    {
-        onAmbientChanged(CalcAmbientColor(t), CalcAmbientIntensity(t));
-    }
-}
-
-void DayNightCycle::ApplyOrbitToLight(DirectionalLight* light, float deg)
-{
-    // Z fijo
-    
-    float rad = glm::radians(deg);
-    glm::vec3 pos = glm::vec3(sin(rad) * orbitRadius, cos(rad) * orbitRadius, 0.0f);
-    light->GetTransform()->position = pos;
-
-    // direccion luz
-    glm::vec3 dir = glm::normalize(-pos);
-
-    // Convertimos la direccion a yaw/pitch para que GetDirection() devuelva lo correcto
-    // pitch = asin(dir.y),  yaw = atan2(dir.z, dir.x)
-    //IA
-    float pitch = glm::degrees(asin(dir.y));
-    float yaw = glm::degrees(atan2(dir.z, dir.x));
-    light->GetTransform()->rotation = glm::vec3(yaw, pitch, 0.0f);
-
-    // solo ilumina si Y positiva
-    float sunHeight = pos.y;
-    light->isVisible = (sunHeight > 0.0f);
-}
-
-glm::vec3 DayNightCycle::CalcAmbientColor(float t) const
-{
-    
-    // t: -1 = medianoche, 0 = amanecer/atardecer, 1 = mediodia
-    glm::vec3 night = glm::vec3(0.05f, 0.05f, 0.15f);
-    glm::vec3 day   = glm::vec3(0.9f,  0.85f, 0.6f);
-    float factor = (t + 1.0f) * 0.5f;
-    return glm::mix(night, day, factor);
-}
-
-float DayNightCycle::CalcAmbientIntensity(float t) const
-{
-    // De noche el ambiente es debil (0.05), de dia es visible (0.35)
-    float factor = (t + 1.0f) * 0.5f;
-    return glm::mix(0.05f, 0.35f, factor);
-}
-
-Pregunta
-asi como has hehco el cpp puedes hacer el .h 
-class DayNightCycle : public GameObject
-{
-public:
-    float cycleDuration = 20.0f;
-    float orbitRadius   = 8.0f;
-
-    DayNightCycle(DirectionalLight* sun, DirectionalLight* moon);
-
-    void Update(float dt) override;
-    void Render(const glm::mat4& view, const glm::mat4& proj, const LightData& lights) override {}
-
-    float GetAngleDeg() const { return angleDeg; }
-
-private:
-    DirectionalLight* sun  = nullptr;
-    DirectionalLight* moon = nullptr;
-    float angleDeg         = 0.0f;
-
-    // Calcula la direccion del astro dado su angulo en la orbita
-    void ApplyOrbitToLight(DirectionalLight* light, float deg);
-
- 
-};
-
-RESPUESTA
-
-#pragma once
-#include "GameObject.h"
+oye el LightManager.h y cpp mira este es el .h
+#include <vector>
 #include "DirectionalLight.h"
-#include "LightData.h"
-#include <glm.hpp>
-#include <functional>
+#include "FlashLight.h"
 
-// Controla el ciclo dia/noche - orbita el sol y la luna
-// y modifica el ambient que se expone a la escena mediante el callback
-class DayNightCycle : public GameObject
+
+#define LM LightManager::GetInstance()
+
+
+
+class LightManager
 {
 public:
-    float cycleDuration = 20.0f; // segundos por ciclo completo
-    float orbitRadius   = 8.0f;
+    static LightManager* GetInstance()
+    {
+        static LightManager instance;
+        return &instance;
+    }
 
-    // Callback que la escena puede usar para recibir el ambient calculado
-    std::function<void(glm::vec3 color, float intensity)> onAmbientChanged;
+	std::vector<DirectionalLight> directionals;
+	std::vector<FlashLight> flashLight;
 
-    DayNightCycle(DirectionalLight* sun, DirectionalLight* moon);
 
-    void Update(float dt) override;
-    void Render(const glm::mat4& view, const glm::mat4& proj, const LightData& lights) override {}
 
-    float GetAngleDeg() const { return angleDeg; }
 
-private:
-    DirectionalLight* sun  = nullptr;
-    DirectionalLight* moon = nullptr;
-    float angleDeg         = 0.0f; // angulo actual de la orbita
 
-    // Calcula la direccion del astro dado su angulo en la orbita
-    void ApplyOrbitToLight(DirectionalLight* light, float deg);
-
-    // Interpola el color ambient entre medianoche y mediodia
-    glm::vec3 CalcAmbientColor(float t) const;
-    float     CalcAmbientIntensity(float t) const;
 };
+
+RESPUESTA:
+Bien, existe. Hay un problema importante en el .h que tienes ahora:
+
+El problema: vector de objetos vs vector de punteros
+cpp
+std::vector<DirectionalLight> directionals;   // ❌ copia objetos
+std::vector<FlashLight> flashLight;           // ❌ copia objetos
+Si guardas los objetos por valor, cuando hagas directionals.push_back(sun) estarías copiando el sol, no guardando el que tienes en la escena. Los cambios que haga UpdateDayNight (mover la posición, cambiar visibilidad...) no se verían reflejados.
+Necesitas punteros:
+cpp
+std::vector<DirectionalLight*> directionals;  // ✅ apunta al original
+std::vector<FlashLight*> flashLight;          // ✅ apunta al original
+
+Lo que le falta al .h
+El LightManager tiene las listas pero no tiene ningún método para:
+Añadir luces (AddDirectional, AddFlashLight)
+Aplicar las luces a un shader (ApplyLights(GLuint shaderProgram))
+El #pragma once al principio
+
+Pregunta clave antes de que escribas ApplyLights
+¿Qué tiene que hacer ese método exactamente? Para cada DirectionalLight* de la lista, tiene que mandar al shader:
+Su dirección (GetForward())
+Su color (color)
+Su intensidad (intensity)
+Si está activa o no (isVisible)
 
 
 PREGUNTA:
-Ahora mismo mando las luces por shader escrito tal cual, como harias tu que pudiera tener varias luces en tiempo real?
-Habia pensado algo como unity de light
 
-algo como 
-struct LightData
-{
+got it vale que sobra y que falta en main scene y el light manager
 
-    //directional light
-    glm::vec3 sunDirection  = glm::vec3(0.0f, -1.0f, 0.0f);
-    glm::vec3 sunColor = glm::vec3(1.0f, 0.95f, 0.8f);
-    
-       glm::vec3 moonDirection = glm::vec3(0.0f, 1.0f, 0.0f);
-    glm::vec3 moonColor = glm::vec3(0.4f, 0.5f, 0.8f);
-  
-};
+
+
+
+
+
+RESPUESTA
+
+MainScene.h
+Sobra:
+#include "DayNightCycle.h" — ya no existe
+Falta:
+float angleDeg = 0.0f; — la usas en UpdateDayNight pero no está declarada
+#include "LightManager.h" — para poder usar LM
+
+MainScene.cpp
+Sobra (líneas 37-46):
+Todo el bloque de dayNightCycle — ya no existe esa variable en el .h
+Bug importante en UpdateDayNight: Tienes esto:
+cpp
+glm::vec3 ambientColor;   // ← variable LOCAL, nueva
+float ambientIntensity;   // ← variable LOCAL, nueva
+Estás creando variables locales nuevas con el mismo nombre que los miembros de la clase. Los miembros nunca se actualizan, por eso el glClearColor de Update() siempre usa el valor inicial. Solución: quita esas dos declaraciones locales y asigna directamente a this->ambientColor y this->ambientIntensity.
+Falta:
+Llamar a UpdateDayNight(dt) desde Update() — la función existe pero nunca se invoca
+En OnEnter(), después de crear sun y moon: LM->AddDirectional(sun) y LM->AddDirectional(moon)
+
+LightManager
+Falta el método principal:
+ApplyLights(GLuint shaderProgram) — sin esto el LightManager no hace nada útil todavía
+
+¿Por cuál empiezas? Te recomiendo primero limpiar el MainScene (los bugs son bloqueantes) y luego atacar ApplyLights.
+
+
+PREGUNTA:
+Paso las luces y me dan errores de iluminacion aunque con el for se supone que mando 2 no?
+RESPUESTA:
+El contrato entre C++ y el shader
+En la Opción A, el shader tiene arrays de tamaño fijo para recibir las luces, y desde C++ los rellenas con un bucle.
+Para tus 2 direccionales necesitas decidir:
+¿Cuántas direccionales soporta el shader como máximo?
+Como tienes exactamente 2 (sol y luna), puedes poner MAX_DIRECTIONALS = 2 en vez de 8
+
+Lo que necesitas en cada sitio
+En el shader GLSL tienes que declarar:
+Un array de direcciones: uniform vec3 dirLightDir[2]
+Un array de colores: uniform vec3 dirLightColor[2]
+Un array de intensidades: uniform float dirLightIntensity[2]
+Un array de activas/no activas: uniform float dirLightActive[2]
+El número de luces reales: uniform int numDirectionals
+Y en el main() del shader, un bucle que itera numDirectionals y acumula el resultado de cada luz.
+En LightManager::ApplyLights(GLuint shaderProgram) tienes que:
+Iterar el vector directionals
+Para cada una, mandar sus datos al array del shader con glUniform3fv(..., index, ...) — fíjate que glUniform para arrays tiene una forma especial
+Mandar también numDirectionals con glUniform1i
+PARA HACERLO ME HE BASADO EN ESTE COMENTARIO 9 DE ESTA PAGINA
+community.khronos.org/t/passing-array-of-vec3-to-fragment-shader/74450/10
+
+Y ESTA
+https://opentk.net/learn/chapter2/6-multiple-lights.html
+
+
+
+PREGUNTA:
+  Puedes cambiar los nombres de las variables en el shader en el TextureFragmentShader.glsl por las variables que he puesto en el Light Manager? Solo haz eso nada mas
 
 
 RESPUESTA:
-tu idea de hacer un struct LightData al estilo Unity es la solución profesional estándar (conocida en la industria como Forward Rendering) por tres grandes razones:
-
-Orden mental y escalabilidad (Como Unity): En lugar de tener la función Render pidiendo 14 variables sueltas (float sunX, float sunY, float sunR...), empaquetas todo en una sola "caja" (tu LightData). Si mañana decides añadir fuego, farolas o linternas, solo añades variables a tu struct y el resto del motor gráfico ni se entera ni se rompe.
-CPU vs GPU: Te habría dicho que la tarjeta gráfica (GPU) es muy rápida pintando, pero muy tonta pensando. Tu idea de tener el LightData en C++ permite que el procesador de tu ordenador (CPU) haga los cálculos difíciles (trigonometría, rotaciones del sol) y una vez que tiene el resultado, mete los números finales en el LightData y se lo manda a la GPU machacadito y listo para pintar.
-Reutilización: Al tener ese struct, puedes tener 500 modelos en pantalla (trolls, rocas, nubes) y a los 500 les pasas exactamente la misma copia de tu LightData.Pero recomiendo los cambios siguientes para estar en linea  con la practica que me pasaste.
-
-struct LightData
-{
-    // Luz ambiente 
-    glm::vec3 ambientColor = glm::vec3(1.0f);
-    float ambientIntensity = 0.1f;
-
-    //directional light
-    glm::vec3 sunDirection  = glm::vec3(0.0f, -1.0f, 0.0f);
-    glm::vec3 sunColor = glm::vec3(1.0f, 0.95f, 0.8f);
-    float sunIntensity  = 1.0f;
-    float sunActive = 1.0f; // 1 si el sol esta por encima del horizonte, 0 si no
-
-    // directional light a 180 grados
-    glm::vec3 moonDirection = glm::vec3(0.0f, 1.0f, 0.0f);
-    glm::vec3 moonColor = glm::vec3(0.4f, 0.5f, 0.8f);
-    float moonIntensity  = 0.4f;
-    float moonActive   = 0.0f;
-};
+He añadido las variables con los arrays exactamente con los mismos nombres que pusiste en el C++ (totalDirectionals, lightDirection, lightColor, lightIntensity, lightIsVisible).
+He eliminado las de sol y luna por separado.
+He juntado el cálculo de las luces direccionales en un único bucle for que acumula el resultado en la variable directionalLights. (Ah, y le puse un max(..., 0.0) al dot para evitar colores negativos cuando la luz da por detrás, que siempre viene bien).
+Con esto, el TextureFragmentShader ya está listo para recibir los datos de tu LightManager. ¿Hay algún otro sitio en el que tengas problemas para conectar esto?
 
 
 PREGUNTA:
-Como calculo el forward de la directional light? tengo esta función y he intentado sacar la Z pero no lo hace, haz solo el codigo
-glm::vec3 DirectionalLight::GetDirection()
-{
+Le he dado al play y ahora el sol esta dentro de la luna y el cube ni se ve, puedes mirar que pasa en los archivos que pase?
 
-    return transform->rotation.z;
+
+Veo tres problemas. Te los explico:
+
+Problema 1 — Sol y luna en el mismo sitio
+UpdateDayNight(dt) nunca se llama desde Update(). Por eso el sol y la luna jamás se mueven de la posición (0, 0, 0). Los dos objetos visuales están en el origen, uno encima del otro.
+Lo que tienes que hacer tú: añadir UpdateDayNight(dt) dentro de MainScene::Update().
+
+Problema 2 — El cubo no se ve
+El PrimitiveFragmentShader.glsl todavía tiene los uniforms viejos (sunDirection, moonDirection...) — hay que actualizarlo igual que hice con el TextureFragmentShader. ¿Quieres que lo actualice también?
+
+Problema 3 — LightManager vacío
+En OnEnter() creas sun y moon pero nunca los registras en el LightManager. Por eso totalDirectionals = 0 y el shader calcula con 0 luces — solo ambient.
+Lo que tienes que hacer tú: justo después de crear sun y moon en OnEnter(), añadir:
+cpp
+LM->AddDirectionalLight(sun);
+LM->AddDirectionalLight(moon);
+
+
+PREGUNTA:
+La cosa es que no se porque ahora se ve distinto de antes, antes los personajes estaban encima del suelo ahora estan volando o el suelo esta muy bajo
+
+
+RESPUESTA:
+El motivo por el que los personajes parecen estar "volando" es puro cálculo matemático de las coordenadas que tienes puestas:
+El suelo se crea en la altura Y = -1.2f
+Los personajes se están creando en la altura Y = -0.8f
+Hay exactamente 0.4f unidades de distancia entre los pies de los personajes y el suelo. Siempre han estado volando, pero como antes los shaders o la iluminación estaban rotos, visualmente no te dabas cuenta o el suelo negro lo disimulaba.
+Para que no vuelen, en MainScene.cpp tienes que igualar las alturas. Por ejemplo, pon el suelo a la misma altura que los spawns:
+cpp
+const float FLOOR_Y = -0.8f; // Antes era -1.2f
+¿Por qué sigue sin verse el suelo?
+Hay dos motivos por los que el cubo (el suelo) puede ser invisible o verse completamente negro:
+Si no le cambiaste el shader: Me pediste "sino lo hace ponle ese (el Texture)". ¡El cubo NO PUEDE usar el TextureFragmentShader! Ese shader necesita una textura y coordenadas UV. Tu cubo solo tiene geometría básica (vértices y normales). Si le pones el shader de texturas y no le pasas una textura, OpenGL lo dibuja completamente negro o invisible. Tienes que asegurarte de que Cube.cpp usa los PrimitiveVertexShader y PrimitiveFragmentShader.
+La luz ambiente está desconectada: En MainScene::UpdateDayNight estás calculando el color del amanecer, mediodía, noche... pero lo estás guardando en variables locales y nunca se lo envías al LightManager.
+Para arreglar la iluminación de toda la escena, añade esto al final de tu LightManager.h:
+cpp
+public:
+   void SetAmbient(glm::vec3 color, float intensity) {
+       ambientColor = color;
+       ambientIntensity = intensity;
+   }
+Y al final de MainScene::UpdateDayNight() (justo antes de la llave de cierre }), añade esto para que el manager reciba el cambio de día y noche:
+cpp
+   // Guardamos en la escena para el sky
+   this->ambientColor = ambientColor;
+   this->ambientIntensity = ambientIntensity;
+   // Y se lo pasamos al LightManager para que ilumine los modelos y el suelo
+   LM->SetAmbient(ambientColor, ambientIntensity);
+Prueba a hacer estos 3 cambios (el FLOOR_Y, confirmar los shaders del cubo a Primitive, y pasarle el ambient al LightManager). ¡Ya deberías ver el suelo verde y la luz cambiando de color!
+
+
+PREGUNTA:
+Puedes mirar porque la luz de la luna no se aplica? O almenos no lo parece
+RESPUESTA:
+¡Muy buena pillada! Resulta que tenías un bug invisible en el LightManager.cpp.
+Mira cómo estaba tu código:
+cpp
+if (lightToSendToShader->isVisible)
+{
+   // ...
+   glUniform1f(..., lightToSendToShader->isVisible);
+   // ...
 }
-
-Respuesta
-glm::vec3 DirectionalLight::GetDirection() const
+¿Ves la trampa mortal ahí?
+Si la luz está visible (isVisible == true), entra al if y le dice al shader lightIsVisible = 1.0. Perfecto.
+Pero cuando la luna o el sol se esconden por debajo del suelo, su isVisible pasa a ser false.
+Como es false, no entra al if. ¡Y por tanto nunca le dice al shader que la luz se ha apagado!
+Para el shader, la última noticia que tuvo fue "la luz 0 está visible" y se queda eternamente calculando esa luz (incluso desde debajo del suelo) bloqueando el efecto real de la luna y el sol alternándose.
+Acabo de arreglarte el archivo LightManager.cpp simplemente sacando la variable lightIsVisible fuera del if para que siempre actualice su estado (sea 1.0 o 0.0):
+cpp
+glUniform1f(glGetUniformLocation(shaderToPass, lightVisibleName.c_str()), lightToSendToShader->isVisible ? 1.0f : 0.0f);
+if (lightToSendToShader->isVisible)
 {
-    // forward
-    float yaw   = transform->rotation.x;
-    float pitch = transform->rotation.y;
-
-    glm::vec3 dir;
-    dir.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
-    dir.y = sin(glm::radians(pitch));
-    dir.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
-    return glm::normalize(dir);
-}
-
-Pregunta: Me puedes ayudar a hacer los shaders que te pase? voy muy perdido hazlos según la ficha que te pase y lo que sabes del proyecto. y de paso haz los Uniforms a pasar
-
-#version 440 core
-
-in vec3 FragNormal;
-in vec3 FragPos;
-
-// Color base del cubo
-uniform vec3 baseColor;
-
-// Luz ambiente
-uniform vec3  ambientColor;
-uniform float ambientIntensity;
-
-// Sol
-uniform vec3  sunDirection;
-uniform vec3  sunColor;
-uniform float sunIntensity;
-uniform float sunActive;
-
-// Luna
-uniform vec3  moonDirection;
-uniform vec3  moonColor;
-uniform float moonIntensity;
-uniform float moonActive;
-
-// Linterna
-uniform vec3  spotPosition;
-uniform vec3  spotDirection;
-uniform vec3  spotColor;
-uniform float spotIntensity;
-uniform float spotInnerCos;
-uniform float spotOuterCos;
-uniform float spotRange;
-uniform int   spotEnabled;
-
-out vec4 fragColor;
-
-vec3 CalcDirectional(vec3 dir, vec3 lightColor, float intensity, float isActive)
-{
-    float diff = max(dot(FragNormal, -normalize(dir)), 0.15);
-    return lightColor * intensity * diff * isActive;
-}
-
-vec3 CalcSpot()
-{
-    if (spotEnabled == 0) return vec3(0.0);
-
-    vec3  toFrag = FragPos - spotPosition;
-    float dist   = length(toFrag);
-    if (dist > spotRange) return vec3(0.0);
-
-    vec3  fragDir = normalize(toFrag);
-    float cosA    = dot(fragDir, normalize(spotDirection));
-
-    if (cosA < spotOuterCos) return vec3(0.0);
-
-    float epsilon = spotInnerCos - spotOuterCos;
-    float cone    = clamp((cosA - spotOuterCos) / epsilon, 0.0, 1.0);
-    float atten   = 1.0 - clamp(dist / spotRange, 0.0, 1.0);
-    atten         = atten * atten;
-
-    float diff    = max(dot(FragNormal, -fragDir), 0.0);
-    return spotColor * spotIntensity * diff * cone * atten;
-}
-
-void main()
-{
-    vec3 ambient  = ambientColor * ambientIntensity;
-    vec3 sun      = CalcDirectional(sunDirection,  sunColor,  sunIntensity,  sunActive);
-    vec3 moon     = CalcDirectional(moonDirection, moonColor, moonIntensity, moonActive);
-    vec3 spot     = CalcSpot();
-
-    vec3 lighting = ambient + sun + moon;
-    fragColor     = vec4(baseColor * lighting, 1.0);
+   // Mandamos el resto de datos solo si hace falta
 }
 
 
-#version 440 core
-
-layout(location = 0) in vec3 posicion;
-layout(location = 1) in vec3 inNormal;
-
-uniform mat4 translationMatrix;
-uniform mat4 rotationMatrix;
-uniform mat4 scaleMatrix;
-uniform mat4 viewMatrix;
-uniform mat4 projectionMatrix;
-
-out vec3 FragNormal;
-out vec3 FragPos;
-
-void main()
-{
-    mat4 model   = translationMatrix * rotationMatrix * scaleMatrix;
-    vec4 worldPos = model * vec4(posicion, 1.0);
-
-    FragPos = worldPos.xyz;
-
-    mat3 normalMatrix = transpose(inverse(mat3(model)));
-    FragNormal = normalize(normalMatrix * inNormal);
-
-    gl_Position = projectionMatrix * viewMatrix * worldPos;
-}
-
-#include "ModelObject.h"
+PREGUNTA:
+Porque ahora la luz de la luna y el sol no se mueven, no se que pasa o hay poco sol o no se puedes mirarlo? pero la luz no se mueve, parece estatica, rectifico la luz del sol si se nota pero la de la luina no
+RESPUESTA:
+¡Acabo de encontrar el porqué y te lo he arreglado! Eran dos bugs matemáticos que tenías en tu código de MainScene.cpp:
+El cielo nunca se hacía de noche: Aunque estabas calculando los colores del cielo (colorNight, colorDay), se los pasabas al LightManager pero nunca actualizabas las variables de la propia escena (this->ambientColor). Como resultado, el fondo de la pantalla siempre era el azul clarito de día. Si el cielo es azul claro, la tenue luz de la luna (que también es azul) pasa totalmente desapercibida y parece que no hay luna.
+Las horas estaban desincronizadas: Estabas usando sin(angulos) en vez de cos(angulos). Esto hacía que cuando el sol estaba en lo más alto (mediodía matemático), el código se creía que era el atardecer, y cuando era medianoche se creía que era el amanecer. Las luces y los colores iban totalmente a destiempo.
+He ajustado el UpdateDayNight cambiando el sin por un cos, ajustando los rangos del if, y añadiendo las dos líneas finales para que el color de fondo (glClearColor) se oscurezca de verdad cuando el sol se esconde.
+Dale al play ahora. Vas a ver cómo el cielo pasa de azul brillante a naranja y luego a un azul muy oscuro. Cuando esté oscuro, la luz de la luna (que va rotando lentamente porque le hemos puesto 60 segundos por vuelta) iluminará el suelo de color azul. ¡Se ve genial!
 
 
-ModelObject::ModelObject(const std::string& modelPath, const std::string& texturePath)
-{
-	// Cargamos modelo
-	Model modelParaCargarOBJ = LoadOBJModel(modelPath);
-	//Lo pongo asi porque es un puntero model
-	model = new Model(modelParaCargarOBJ); 
+PREGUNTA
+He quitado el LightData  y el DayNightCycle y ahora me esta dando error y no puedo darle play porque la Main Scene usa el LightData puedes quitarlo? 
 
-	// Cargamos la textura con stb image
-	int width, height, nrChannels;
-	unsigned char* data = stbi_load(texturePath.c_str(), &width, &height, &nrChannels, 0);
-	if (data)
-	{
-		glGenTextures(1, &textureID);
-		glBindTexture(GL_TEXTURE_2D, textureID);
-		
-		
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-		
-		
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-		GLenum format = GL_RGB;
-		if (nrChannels == 4) format = GL_RGBA;
-
-		glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
-		glGenerateMipmap(GL_TEXTURE_2D);
-
-		stbi_image_free(data);
-	}
-	else
-	{
-		std::cerr << "Failed to load texture: " << texturePath << std::endl;
-	}
-
-	//Shaders para texturas
-	RenderManager::ShaderProgram shaderStruct;
-	shaderStruct.vertexShader = RM->LoadVertexShader("TextureVertexShader.glsl");
-	shaderStruct.fragmentShader = RM->LoadFragmentShader("TextureFragmentShader.glsl");
-	shaderProgram = RM->CreateProgram(shaderStruct);
-}
-
-ModelObject::~ModelObject()
-{
-	glDeleteTextures(1, &textureID);
-	delete model;
-}
-
-void ModelObject::Update(float dt) {}
-
-void ModelObject::Render(const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix, const LightData& lights)
-{
-	if (!isVisible) return;
-
-	glUseProgram(shaderProgram);
-
-	// Transform
-	glm::mat4 modelMat = transform->GetModelMatrix();
-	glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "modelMatrix"),1, GL_FALSE, glm::value_ptr(modelMat));
-	glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "viewMatrix"), 1, GL_FALSE, glm::value_ptr(viewMatrix));
-	glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "projectionMatrix"), 1, GL_FALSE, glm::value_ptr(projectionMatrix));
-
-	// Tint del Color
-	glUniform4fv(glGetUniformLocation(shaderProgram, "tintColor"), 1, glm::value_ptr(tintColor));
-
-	// Unlit flag
-	glUniform1i(glGetUniformLocation(shaderProgram, "isUnlit"), isUnlit ? 1 : 0);
-
-	// Texture
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, textureID);
-	glUniform1i(glGetUniformLocation(shaderProgram, "textureSampler"), 0);
-
-	// Ambiente
-	glUniform3fv(glGetUniformLocation(shaderProgram, "ambientColor"), 1, glm::value_ptr(lights.ambientColor));
-	glUniform1f (glGetUniformLocation(shaderProgram, "ambientIntensity"), lights.ambientIntensity);
-
-	// Sol
-	glUniform3fv(glGetUniformLocation(shaderProgram, "sunDirection"), 1, glm::value_ptr(lights.sunDirection));
-	glUniform3fv(glGetUniformLocation(shaderProgram, "sunColor"),  1, glm::value_ptr(lights.sunColor));
-	glUniform1f (glGetUniformLocation(shaderProgram, "sunIntensity"), lights.sunIntensity);
-	glUniform1f (glGetUniformLocation(shaderProgram, "sunActive"), lights.sunActive);
-
-	// Luna
-	glUniform3fv(glGetUniformLocation(shaderProgram, "moonDirection"),1, glm::value_ptr(lights.moonDirection));
-	glUniform3fv(glGetUniformLocation(shaderProgram, "moonColor"), 1, glm::value_ptr(lights.moonColor));
-	glUniform1f (glGetUniformLocation(shaderProgram, "moonIntensity"),lights.moonIntensity);
-	glUniform1f (glGetUniformLocation(shaderProgram, "moonActive"), lights.moonActive);
-// Renderizo modelo
-	model->Render();
-
-	glUseProgram(0);
-}
-
-Pregunta
-Como paso las lights por la escena para que se pinten en realTime
-
-RESPUESTA
-
+ANTES (Lo que te daba error)
+Antes, la propia Escena tenía que buscar manualmente a todos los objetos luz (haciendo conversiones dynamic_cast), rellenar un paquete de datos llamado LightData y pelearse con ello.
+cpp
 void Scene::Render()
 {
-    // Obtenemos la posición y perspectiva de la cámara
-    glm::mat4 viewMatrix       = camera->GetViewMatrix();
-    glm::mat4 projectionMatrix = camera->GetProjectionMatrix((float)WINDOW_WIDTH / (float)WINDOW_HEIGHT);
-    // PASO 1: Preparamos el "maletín" vacío (LightData) y le metemos el color ambiente
-    LightData lights;
-    lights.ambientColor     = ambientColor;
-    lights.ambientIntensity = ambientIntensity;
-    // PASO 2: Hacemos un barrido para buscar al Sol y a la Luna y robarles sus datos
-    for (GameObject* o : objects)
-    {
-        DirectionalLight* dl = dynamic_cast<DirectionalLight*>(o);
-        if (dl)
-        {
-            if (dl->tag == "sun")
-            {
-                lights.sunDirection = dl->GetDirection();
-                lights.sunColor     = dl->color;
-                lights.sunIntensity = dl->intensity;
-                lights.sunActive    = dl->isVisible ? 1.0f : 0.0f; // 0.0f si bajó del suelo
-            }
-            else if (dl->tag == "moon")
-            {
-                lights.moonDirection = dl->GetDirection();
-                lights.moonColor     = dl->color;
-                lights.moonIntensity = dl->intensity;
-                lights.moonActive    = dl->isVisible ? 1.0f : 0.0f;
-            }
-        }
-    }
-    // PASO 3: Hacemos un último barrido enviando el "maletín" lleno (lights) a todo el mundo
-    for (GameObject* o : objects) {
-        if (o != nullptr && o->isVisible) {
-            
-            // Aquí es donde se lo enchufamos a los Trolls, Rocas y el Suelo
-            o->Render(viewMatrix, projectionMatrix, lights);
-            
-        }
-    }
+	glm::mat4 viewMatrix = camera->GetViewMatrix();
+	glm::mat4 projectionMatrix = camera->GetProjectionMatrix((float)WINDOW_WIDTH / (float)WINDOW_HEIGHT);
+	LightData lights;
+	lights.ambientColor = ambientColor;
+	lights.ambientIntensity = ambientIntensity;
+	for (GameObject* o : objects)
+	{
+		DirectionalLight* dl = dynamic_cast<DirectionalLight*>(o);
+		if (dl)
+		{
+			if (dl->tag == "sun")
+			{
+				lights.sunDirection = dl->GetForward();
+				lights.sunColor = dl->color;
+				lights.sunIntensity = dl->intensity;
+				lights.sunActive = dl->isVisible ? 1.0f : 0.0f;
+			}
+			else if (dl->tag == "moon")
+			{
+				lights.moonDirection = dl->GetForward();
+				lights.moonColor = dl->color;
+				lights.moonIntensity = dl->intensity;
+				lights.moonActive = dl->isVisible ? 1.0f : 0.0f;
+			}
+		}
+	}
+	FlashLight* sl = camera->flashlight;
+	if (sl)
+	{
+		lights.flashLightPosition = sl->GetTransform()->position;
+		lights.flashLightForward = sl->GetForward();
+		lights.flashLightInCircle = sl->GetInCircle();
+		lights.flashLightOutCircle = sl->GetOutCircle();
+		lights.flashLightRange = sl->range;
+		lights.flashLightEnabled = sl->enabled ? 1 : 0;
+	}
+	for (GameObject* o : objects) {
+		if (o != nullptr && o->isVisible) {
+			o->Render(viewMatrix, projectionMatrix);
+		}
+	}
 }
 
-Pregunta: Lo mismo de las luces lo puedes hacer para el daynight cycle que te acabo de pasar 
-
-Respuesta:
-void DayNightCycle::Update(float dt)
+AHORA (El código actual)
+Con la llegada del LightManager, la escena ya no necesita saber si existe el sol, la luna o las linternas. El LightManager es el que almacena las luces cuando se crean y se encarga de enviarlas a la gráfica. La función de la escena vuelve a ser simplemente "Dibuja a los objetos en la pantalla usando la cámara". Fíjate qué limpieza:
+cpp
+void Scene::Render()
 {
-    
-    float degreesPerSecond = 360.0f / cycleDuration;
-    angleDeg += degreesPerSecond * dt;
-    if (angleDeg >= 360.0f) angleDeg -= 360.0f;
-
-    //180 grados entre si
-    ApplyOrbitToLight(sun,  angleDeg);
-    ApplyOrbitToLight(moon, angleDeg + 180.0f);
-
-    // angulo 90 = sol
-    float t = sin(glm::radians(angleDeg));
-
-    // Calculamos el ambient de este momento y avisamos a quien escuche
-    if (onAmbientChanged)
-    {
-        onAmbientChanged(CalcAmbientColor(t), CalcAmbientIntensity(t));
-    }
+	glm::mat4 viewMatrix = camera->GetViewMatrix();
+	glm::mat4 projectionMatrix = camera->GetProjectionMatrix((float)WINDOW_WIDTH / (float)WINDOW_HEIGHT);
+	for (GameObject* o : objects) {
+		if (o != nullptr && o->isVisible) {
+			o->Render(viewMatrix, projectionMatrix);
+		}
+	}
 }
+Ese bloque gigante del medio intentaba crear un LightData que tú ya habías borrado con buen criterio, y por eso OpenGL te decía "No sé qué es esto". Al borrarlo, todo vuelve a encajar con tu nueva arquitectura.
 
-void DayNightCycle::ApplyOrbitToLight(DirectionalLight* light, float deg)
-{
-    // Z fijo
-    
-    float rad = glm::radians(deg);
-    glm::vec3 pos = glm::vec3(sin(rad) * orbitRadius, cos(rad) * orbitRadius, 0.0f);
-    light->GetTransform()->position = pos;
-
-    // direccion luz
-    glm::vec3 dir = glm::normalize(-pos);
-
-    // Convertimos la direccion a yaw/pitch para que GetDirection() devuelva lo correcto
-    // pitch = asin(dir.y),  yaw = atan2(dir.z, dir.x)
-    //IA
-    float pitch = glm::degrees(asin(dir.y));
-    float yaw = glm::degrees(atan2(dir.z, dir.x));
-    light->GetTransform()->rotation = glm::vec3(yaw, pitch, 0.0f);
-
-    // solo ilumina si Y positiva
-    float sunHeight = pos.y;
-    light->isVisible = (sunHeight > 0.0f);
-}
-
-glm::vec3 DayNightCycle::CalcAmbientColor(float t) const
-{
-    
-    // t: -1 = medianoche, 0 = amanecer/atardecer, 1 = mediodia
-    glm::vec3 night = glm::vec3(0.05f, 0.05f, 0.15f);
-    glm::vec3 day   = glm::vec3(0.9f,  0.85f, 0.6f);
-    float factor = (t + 1.0f) * 0.5f;
-    return glm::mix(night, day, factor);
-}
-
-float DayNightCycle::CalcAmbientIntensity(float t) const
-{
-    // De noche el ambiente es debil (0.05), de dia es visible (0.35)
-    float factor = (t + 1.0f) * 0.5f;
-    return glm::mix(0.05f, 0.35f, factor);
-
-}
-
-PREGUNTA: EL cube que te he pasado le faltan los nuevos VBO y los vao ponlos
-
-RESPUESTA: #include "Cube.h"
-#include <gtc/matrix_transform.hpp>
-#include <gtc/type_ptr.hpp>
-#include "RenderManager.h"
-
-Cube::Cube(glm::vec3 position, glm::vec3 scale)
-{
-    RenderManager::ShaderProgram shaders;
-    shaders.vertexShader   = RM->LoadVertexShader("PrimitiveVertexShader.glsl");
-    shaders.fragmentShader = RM->LoadFragmentShader("PrimitiveFragmentShader.glsl");
-    shaderProgram = RM->CreateProgram(shaders);
-
-    // Posicion (x,y,z) y normal (nx,ny,nz) por vertice - stride 6 floats
-    float vertices[] = {
-        // Cara trasera  (normal 0,0,-1)
-        -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
-         0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
-         0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
-         0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
-        -0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
-        -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
-        // Cara frontal  (normal 0,0,1)
-        -0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
-         0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
-         0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
-         0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
-        -0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
-        -0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
-        // Cara izquierda (normal -1,0,0)
-        -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
-        -0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
-        -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
-        -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
-        -0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
-        -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
-        // Cara derecha  (normal 1,0,0)
-         0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
-         0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
-         0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
-         0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
-         0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
-         0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
-        // Cara inferior (normal 0,-1,0)
-        -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
-         0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
-         0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
-         0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
-        -0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
-        -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
-        // Cara superior (normal 0,1,0)
-        -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,
-         0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,
-         0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
-         0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
-        -0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
-        -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,
-    };
-
-    // VAO propio con stride 6 (pos + normal intercalados)
-    glGenVertexArrays(1, &vao);
-    glGenBuffers(1, &vbo);
-    glBindVertexArray(vao);
-    glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-    // location 0 - posicion
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
-    glEnableVertexAttribArray(0);
-    // location 1 - normal
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
-    glEnableVertexAttribArray(1);
-
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glBindVertexArray(0);
-
-    transform->position = position;
-    transform->rotation = glm::vec3(0.0f);
-    transform->scale    = scale;
-}
-
-void Cube::Update(float dt) {}
-
-void Cube::Render(const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix, const LightData& lights)
-{
-    glUseProgram(shaderProgram);
-
-    glm::mat4 T = transform->GetTranslationMatrix();
-    glm::mat4 R = transform->GetRotationMatrix();
-    glm::mat4 S = transform->GetScaleMatrix();
-
-    glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "translationMatrix"), 1, GL_FALSE, glm::value_ptr(T));
-    glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "rotationMatrix"),    1, GL_FALSE, glm::value_ptr(R));
-    glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "scaleMatrix"),       1, GL_FALSE, glm::value_ptr(S));
-    glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "viewMatrix"),        1, GL_FALSE, glm::value_ptr(viewMatrix));
-    glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "projectionMatrix"),  1, GL_FALSE, glm::value_ptr(projectionMatrix));
-
-    glUniform3fv(glGetUniformLocation(shaderProgram, "baseColor"), 1, glm::value_ptr(baseColor));
-
-    // Ambiente
-    glUniform3fv(glGetUniformLocation(shaderProgram, "ambientColor"),     1, glm::value_ptr(lights.ambientColor));
-    glUniform1f (glGetUniformLocation(shaderProgram, "ambientIntensity"),    lights.ambientIntensity);
-    // Sol
-    glUniform3fv(glGetUniformLocation(shaderProgram, "sunDirection"),  1, glm::value_ptr(lights.sunDirection));
-    glUniform3fv(glGetUniformLocation(shaderProgram, "sunColor"),      1, glm::value_ptr(lights.sunColor));
-    glUniform1f (glGetUniformLocation(shaderProgram, "sunIntensity"),     lights.sunIntensity);
-    glUniform1f (glGetUniformLocation(shaderProgram, "sunActive"),        lights.sunActive);
-    // Luna
-    glUniform3fv(glGetUniformLocation(shaderProgram, "moonDirection"), 1, glm::value_ptr(lights.moonDirection));
-    glUniform3fv(glGetUniformLocation(shaderProgram, "moonColor"),     1, glm::value_ptr(lights.moonColor));
-    glUniform1f (glGetUniformLocation(shaderProgram, "moonIntensity"),    lights.moonIntensity);
-    glUniform1f (glGetUniformLocation(shaderProgram, "moonActive"),       lights.moonActive);
-glBindVertexArray(vao);
-    glDrawArrays(GL_TRIANGLES, 0, vertexCount);
-    glBindVertexArray(0);
-
-    glUseProgram(0);
-}
-
-
-Tambien se ha utilizado los LLM para la siguiente tool
 
 
 Prompt:
