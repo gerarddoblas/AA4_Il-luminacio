@@ -3,7 +3,6 @@
 #include "Transform.h"
 #include <string>
 #include "MeshRenderer.h"
-#include "LightData.h"
 
 class GameObject
 {

@@ -6,7 +6,6 @@
 #include "Camera.h"
 #include "RenderManager.h"
 #include "InputManager.h"
-#include "LightData.h"
 #include "DirectionalLight.h"
 
 class Scene {
