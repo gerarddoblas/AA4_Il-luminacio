@@ -153,7 +153,6 @@ void MainScene::UpdateDayNight(float dt)
     OrbitAroundWorld(sun, timeWithDegrees);
     OrbitAroundWorld(moon, timeWithDegrees + 180.0f);
 
-    // angulo 0 = mediodia (cos = 1), 180 = medianoche (cos = -1)
     float timeOfDay = cos(glm::radians(timeWithDegrees));
     glm::vec3 colorNight = glm::vec3(0.05f, 0.05f, 0.15f); // Azul oscuro
     glm::vec3 colorEvening = glm::vec3(0.60f, 0.30f, 0.20f); // Naranja

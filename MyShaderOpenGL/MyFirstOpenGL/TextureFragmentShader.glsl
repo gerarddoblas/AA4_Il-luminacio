@@ -44,7 +44,7 @@ void main()
     {
         if(lightIsVisible[i] > 0.0)
         {
-            float amountLight = max(dot(FragNormal, normalize(lightDirection[i] * -1.0)), 0.0);
+            float amountLight = max(dot(FragNormal, normalize(lightDirection[i] * -1.0)),0.0);
             directionalLights += lightColor[i] * lightIntensity[i] * amountLight;
         }
     }
@@ -77,8 +77,8 @@ void main()
                     intensity = 0.0;
                 }
 
-                float amountLightImpact = dot(FragNormal, normalizedFragDirection * -1);
-                flashLight = vec3(amountLightImpact * intensity);
+                float amountLightImpact = dot(FragNormal, normalizedFragDirection * -1.0);
+                flashLight += vec3(amountLightImpact * intensity);
             }
         }
     }

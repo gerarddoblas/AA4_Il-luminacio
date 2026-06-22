@@ -40,7 +40,7 @@ void main()
     {
         if(lightIsVisible[i] > 0.0)
         {
-            float amountLight = max(dot(FragNormal, normalize(lightDirection[i] * -1.0)), 0.0);
+            float amountLight = max(dot(FragNormal, normalize(lightDirection[i] * -1.0)),0.0);
             directionalLights += lightColor[i] * lightIntensity[i] * amountLight;
         }
     }
