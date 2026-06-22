@@ -1,9 +1,0 @@
-Integrantes:
-
-Edgar Novas, Nil Barrero y Gerard Doblas
-
-Link al repositorio:
-https://github.com/gerarddoblas/AA4_Il-luminacio
-
-Link al ultimo commite:
-b16335f8c6e2a5a54ccd3ef7874047b578cddb37
