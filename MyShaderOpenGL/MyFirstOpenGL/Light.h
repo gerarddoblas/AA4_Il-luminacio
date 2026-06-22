@@ -11,5 +11,5 @@ public:
 
     Light();
 
-    void Render(const glm::mat4& view, const glm::mat4& proj, const struct LightData& lights) override {}
+    void Render(const glm::mat4& view, const glm::mat4& proj) override {}
 };

@@ -3,7 +3,6 @@
 #include "Transform.h"
 #include <string>
 #include "MeshRenderer.h"
-#include "LightData.h"
 
 class GameObject
 {
@@ -24,7 +23,7 @@ public:
 
 	virtual glm::vec3 GetForward() const;
 
-	virtual void Render(const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix, const LightData& lights);
+	virtual void Render(const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix);
 
 	Transform* GetTransform() const { return transform; }
 	MeshRenderer* GetMeshRenderer() const { return meshRenderer; }
