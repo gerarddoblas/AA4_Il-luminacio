@@ -130,6 +130,141 @@ ApplyLights(GLuint shaderProgram) — sin esto el LightManager no hace nada úti
 ¿Por cuál empiezas? Te recomiendo primero limpiar el MainScene (los bugs son bloqueantes) y luego atacar ApplyLights.
 
 
+
+PREGUNTA:
+void main()
+
+{
+
+    vec4 texColor = texture(textureSampler, TexCoord) * tintColor;
+
+
+
+    vec3 ambient = ambientColor * ambientIntensity;
+
+
+
+    vec3 directionalLights = vec3(0.0);
+
+    for(int i = 0; i < totalDirectionals; i++)
+
+    {
+
+        if(lightIsVisible[i] > 0.0)
+
+        {
+
+            float amountLight = max(dot(FragNormal, normalize(lightDirection[i] * -1.0)),0.0);
+
+            directionalLights += lightColor[i] * lightIntensity[i] * amountLight;
+
+        }
+
+    }
+
+
+
+    vec3 flashLight = vec3(0.0);
+
+    for(int i = 0; i < totalFlashLights; i++)
+
+    {
+
+        
+
+        if (flashLightEnabled[i] == 1)
+
+        {
+
+            vec3 directionFrag = FragPos - flashLightPosition[i];
+
+
+            if (directionFrag < flashLightRange[i])
+
+            {
+
+                vec3 normalizedFragDirection = normalize(directionFrag);
+
+                float centerDistance = dot(normalizedFragDirection, normalize(flashLightForward[i]));
+
+                float intensity = 0.0;
+
+                if (centerDistance > flashLightInCircle[i])
+
+                {
+
+                    intensity = 1.0;
+
+                }
+
+                else if (centerDistance > flashLightOutCircle[i])
+
+                {
+
+                    intensity = 0.5;
+
+                }
+
+                else
+
+                {
+
+                    intensity = 0.0;
+
+                }
+
+
+
+                float amountLightImpact = dot(FragNormal, normalizedFragDirection * -1.0);
+
+                flashLight= vec3(amountLightImpact * intensity);
+
+            }
+
+        }
+
+    }
+
+    vec3 lighting = ambient * directionalLights * flashLight;
+
+    fragColor = vec4(texColor.rgb * lighting, texColor.a);
+
+}
+
+porque se ve raro mi iluminacion? 
+
+RESPUESTA:
+El problema principal por el que tu iluminación se ve "rara" (probablemente estás viendo zonas completamente negras donde no da la linterna, o colores que se anulan entre sí) se debe a un par de conceptos clave sobre cómo interactúan las matemáticas de la luz en los shaders.
+
+Aquí tienes los errores principales y cómo solucionarlos:
+
+1. Estás multiplicando las luces en lugar de sumarlas (Error crítico)
+Al final de tu función main(), estás combinando las luces así:
+
+OpenGL Shading Language
+// INCORRECTO
+vec3 lighting = ambient * directionalLights * flashLight;
+¿Por qué falla? La luz física es aditiva. Si multiplicas los valores, en el momento en que un fragmento quede fuera del rango de la linterna (flashLight = 0.0), el resultado de toda la multiplicación será 0.0. Esto anula por completo tu luz ambiental y direccional, tiñendo el modelo de negro absoluto.
+
+La solución: Suma las contribuciones lumínicas.
+
+OpenGL Shading Language
+// CORRECTO
+vec3 lighting = ambient + directionalLights + flashLight;
+
+2. El cálculo del vector dirección
+OpenGL Shading Language
+vec3 directionFrag = FragPos - flashLightPosition[i];
+Al restar la posición de la luz (flashLightPosition) de la posición del píxel en el mundo (FragPos),
+ obtienes un vector 3D que "apunta" desde la linterna hacia ese píxel exacto. 
+Sin embargo, este vector contiene coordenadas $(x, y, z)$, no una distancia simple.
+Aquí es donde entra length(). Toma ese vector 3D y utiliza el teorema de Pitágoras para calcular exactamente cuánto mide de largo.
+Matemáticamente, para un vector 3D $\vec{v} = (x, y, z)$, la función length() 
+ejecuta la siguiente fórmula:$$||\vec{v}|| = \sqrt{x^2 + y^2 + z^2}$$
+El resultado es un único número (float). 
+Si el fragmento de la pared está a 5 unidades de distancia de la luz en tu mundo 3D, la variable dist valdrá exactamente 5.0.
+
+
 PREGUNTA:
 Paso las luces y me dan errores de iluminacion aunque con el for se supone que mando 2 no?
 RESPUESTA:
