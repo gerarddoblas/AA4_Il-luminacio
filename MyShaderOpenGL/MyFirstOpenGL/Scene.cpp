@@ -39,47 +39,10 @@ void Scene::Render()
 	glm::mat4 viewMatrix = camera->GetViewMatrix();
 	glm::mat4 projectionMatrix = camera->GetProjectionMatrix((float)WINDOW_WIDTH / (float)WINDOW_HEIGHT);
 
-	
-	LightData lights;
-	lights.ambientColor = ambientColor;
-	lights.ambientIntensity = ambientIntensity;
-
-	for (GameObject* o : objects)
-	{
-		DirectionalLight* dl = dynamic_cast<DirectionalLight*>(o);
-		if (dl)
-		{
-			if (dl->tag == "sun")
-			{
-				lights.sunDirection = dl->GetForward();
-				lights.sunColor = dl->color;
-				lights.sunIntensity = dl->intensity;
-				lights.sunActive = dl->isVisible ? 1.0f : 0.0f;
-			}
-			else if (dl->tag == "moon")
-			{
-				lights.moonDirection = dl->GetForward();
-				lights.moonColor = dl->color;
-				lights.moonIntensity = dl->intensity;
-				lights.moonActive = dl->isVisible ? 1.0f : 0.0f;
-			}
-		}
-	}
-
-	FlashLight* sl = camera->flashlight;
-	if (sl)
-	{
-		lights.flashLightPosition = sl->GetTransform()->position;
-		lights.flashLightForward = sl->GetForward();
-		lights.flashLightInCircle = sl->GetInCircle();
-		lights.flashLightOutCircle = sl->GetOutCircle();
-		lights.flashLightRange = sl->range;
-		lights.flashLightEnabled = sl->enabled ? 1 : 0;
-	}
 
 	for (GameObject* o : objects) {
 		if (o != nullptr && o->isVisible) {
-			o->Render(viewMatrix, projectionMatrix, lights);
+			o->Render(viewMatrix, projectionMatrix);
 		}
 	}
 }

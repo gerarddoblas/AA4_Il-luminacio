@@ -6,6 +6,7 @@ Camera::Camera() : GameObject()
     transform->position = glm::vec3(0.0f, 0.5f, 4.0f);
     transform->rotation.x = -90.0f;
     flashlight = new FlashLight();
+    LM->AddFlashLight(flashlight);
 }
 
 Camera::~Camera()
